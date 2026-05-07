@@ -1,16 +1,23 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, ArrowRight } from 'lucide-react';
 import Logo from '../components/Logo';
 
 export default function Login() {
+  const navigate = useNavigate();
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    navigate('/dashboard');
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#F8F9FA] px-4">
       <div className="w-full max-w-md">
         <Logo subtitle="Enterprise Asset Management System" />
         
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
-          <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+          <form className="space-y-6" onSubmit={handleLogin}>
             <div>
               <label className="block text-xs font-medium text-gray-600 mb-2 uppercase tracking-wider">
                 Email Address
