@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Filter, Eye, MoreHorizontal } from 'lucide-react';
 
 const mockClaims = [
@@ -55,9 +56,9 @@ export default function Reports() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex items-center justify-end gap-2">
-                      <button className="p-1 text-gray-400 hover:text-blue-600 transition-colors" title="View Details">
+                      <Link to={`/dashboard/reports/${claim.id}`} className="p-1 text-gray-400 hover:text-blue-600 transition-colors" title="View Details">
                         <Eye className="h-4 w-4" />
-                      </button>
+                      </Link>
                       <button className="p-1 text-gray-400 hover:text-gray-600 transition-colors">
                         <MoreHorizontal className="h-4 w-4" />
                       </button>

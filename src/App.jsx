@@ -10,7 +10,9 @@ import ResetSuccess from './pages/ResetSuccess';
 import DashboardLayout from './layouts/DashboardLayout';
 import DashboardMetrics from './pages/dashboard/DashboardMetrics';
 import Sales from './pages/dashboard/Sales';
+import SalesDetails from './pages/dashboard/SalesDetails';
 import Reports from './pages/dashboard/Reports';
+import ClaimDetails from './pages/dashboard/ClaimDetails';
 
 const router = createBrowserRouter([
   {
@@ -46,8 +48,16 @@ const router = createBrowserRouter([
         element: <Sales />,
       },
       {
+        path: "sales/:id",
+        element: <SalesDetails />,
+      },
+      {
         path: "reports",
         element: <Reports />,
+      },
+      {
+        path: "reports/:id",
+        element: <ClaimDetails />,
       }
     ]
   }

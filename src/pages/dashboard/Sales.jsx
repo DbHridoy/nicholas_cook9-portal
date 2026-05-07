@@ -1,22 +1,23 @@
 import React, { useState } from 'react';
-import { Upload, FilePlus, Search, Download } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Upload, FilePlus, Search, Download, Eye } from 'lucide-react';
 
-const mockProducts = [
-  { id: 'PRD-001', name: 'Enterprise Router X1', category: 'Networking', price: '$899.00', stock: 45 },
-  { id: 'PRD-002', name: 'SecureSwitch 48-Port', category: 'Networking', price: '$1,299.00', stock: 12 },
-  { id: 'PRD-003', name: 'Cloud Storage Node 8TB', category: 'Storage', price: '$2,499.00', stock: 8 },
-  { id: 'PRD-004', name: 'Gateway Firewall Pro', category: 'Security', price: '$1,850.00', stock: 24 },
+const mockOrders = [
+  { id: 'ORD-9821', customer: 'John Doe', product: 'SecureSwitch 48-Port', total: '$1,299.00', status: 'Delivered' },
+  { id: 'ORD-9822', customer: 'Jane Smith', product: 'Enterprise Router X1', total: '$899.00', status: 'Processing' },
+  { id: 'ORD-9823', customer: 'Bob Johnson', product: 'Cloud Storage Node 8TB', total: '$2,499.00', status: 'Shipped' },
+  { id: 'ORD-9824', customer: 'Alice Williams', product: 'Gateway Firewall Pro', total: '$1,850.00', status: 'Delivered' },
 ];
 
 export default function Sales() {
-  const [products] = useState(mockProducts);
+  const [orders] = useState(mockOrders);
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[#111827]">Sales & Products</h1>
-          <p className="text-sm text-gray-500 mt-1">Manage your product catalog and view sales details.</p>
+          <h1 className="text-2xl font-bold text-[#111827]">Sales & Orders</h1>
+          <p className="text-sm text-gray-500 mt-1">Manage your sales orders and view detailed transaction history.</p>
         </div>
         
         <button 
@@ -31,19 +32,19 @@ export default function Sales() {
 
       <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:bg-gray-50 transition-colors cursor-pointer" onClick={() => document.getElementById('csv-upload').click()}>
         <FilePlus className="h-10 w-10 text-gray-400 mx-auto mb-3" />
-        <h3 className="text-sm font-medium text-[#111827] mb-1">Upload Product CSV</h3>
-        <p className="text-xs text-gray-500">Drag and drop or click to browse files</p>
+        <h3 className="text-sm font-medium text-[#111827] mb-1">Upload Sales CSV</h3>
+        <p className="text-xs text-gray-500">Import your sales data from a CSV file</p>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="p-4 border-b border-gray-100 flex items-center justify-between">
-          <div className="relative w-full max-w-sm">
+          <div className="relative w-full max-sm:max-w-xs sm:max-w-sm">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-4 w-4 text-gray-400" />
             </div>
             <input
               type="text"
-              placeholder="Search products..."
+              placeholder="Search orders..."
               className="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#111827] focus:border-transparent text-sm"
             />
           </div>
@@ -55,28 +56,36 @@ export default function Sales() {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product ID</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th scope="col" className="relative px-6 py-3"><span className="sr-only">Actions</span></th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {products.map((product) => (
-                <tr key={product.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-[#111827]">{product.id}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{product.name}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      {product.category}
+              {orders.map((order) => (
+                <tr key={order.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-[#111827]">{order.id}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{order.customer}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{order.product}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{order.total}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      order.status === 'Delivered' 
+                        ? 'bg-green-100 text-green-800' 
+                        : order.status === 'Shipped'
+                        ? 'bg-blue-100 text-blue-800'
+                        : 'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {order.status}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{product.price}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                    <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${product.stock < 15 ? 'bg-orange-100 text-orange-800' : 'bg-green-100 text-green-800'}`}>
-                      {product.stock} in stock
-                    </span>
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <Link to={`/dashboard/sales/${order.id}`} className="text-gray-400 hover:text-blue-600 transition-colors">
+                      <Eye className="h-5 w-5 inline" />
+                    </Link>
                   </td>
                 </tr>
               ))}
