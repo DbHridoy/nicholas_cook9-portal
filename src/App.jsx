@@ -13,6 +13,15 @@ import Sales from './pages/dashboard/Sales';
 import SalesDetails from './pages/dashboard/SalesDetails';
 import Reports from './pages/dashboard/Reports';
 import ClaimDetails from './pages/dashboard/ClaimDetails';
+import Products from './pages/dashboard/Products';
+
+// Admin pages
+import DealerList from './pages/dashboard/admin/DealerList';
+import CreateDealer from './pages/dashboard/admin/CreateDealer';
+import SalesAnalytics from './pages/dashboard/admin/SalesAnalytics';
+import DealerDetails from './pages/dashboard/admin/DealerDetails';
+import Complaints from './pages/dashboard/admin/Complaints';
+import ComplaintDetails from './pages/dashboard/admin/ComplaintDetails';
 
 const router = createBrowserRouter([
   {
@@ -52,12 +61,41 @@ const router = createBrowserRouter([
         element: <SalesDetails />,
       },
       {
+        path: "products",
+        element: <Products />,
+      },
+      {
         path: "reports",
         element: <Reports />,
       },
       {
         path: "reports/:id",
         element: <ClaimDetails />,
+      },
+      // Admin routes
+      {
+        path: "dealers",
+        element: <DealerList />,
+      },
+      {
+        path: "dealers/create",
+        element: <CreateDealer />,
+      },
+      {
+        path: "dealers/:id",
+        element: <DealerDetails />,
+      },
+      {
+        path: "analytics",
+        element: <SalesAnalytics />,
+      },
+      {
+        path: "complaints",
+        element: <Complaints />,
+      },
+      {
+        path: "complaints/:id",
+        element: <ComplaintDetails />,
       }
     ]
   }

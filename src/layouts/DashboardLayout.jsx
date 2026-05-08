@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, ShoppingCart, FileText, LogOut, User, Menu } from 'lucide-react';
+import { LayoutDashboard, ShoppingCart, FileText, LogOut, User, Menu, TrendingUp, Package, MessageSquare } from 'lucide-react';
 import Logo from '../components/Logo';
 
 export default function DashboardLayout() {
@@ -11,11 +11,24 @@ export default function DashboardLayout() {
     navigate('/');
   };
 
-  const navItems = [
+  const userRole = 'admin'; // This should come from auth state/context
+
+  const commonNavItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+    { name: 'Products', path: '/dashboard/products', icon: Package },
     { name: 'Sales', path: '/dashboard/sales', icon: ShoppingCart },
     { name: 'Reports', path: '/dashboard/reports', icon: FileText },
   ];
+
+  const adminNavItems = [
+    { name: 'Dealers', path: '/dashboard/dealers', icon: User },
+    { name: 'Sales Analytics', path: '/dashboard/analytics', icon: TrendingUp },
+    { name: 'Complaints', path: '/dashboard/complaints', icon: MessageSquare },
+  ];
+
+  const navItems = userRole === 'admin' 
+    ? [...commonNavItems, ...adminNavItems] 
+    : commonNavItems;
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] flex">
