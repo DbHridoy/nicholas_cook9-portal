@@ -3,12 +3,29 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, ArrowRight } from 'lucide-react';
 import Logo from '../components/Logo';
 
+import { useDispatch } from 'react-redux';
+import { login } from '../store/authSlice';
+
 export default function Login() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [error, setError] = React.useState('');
 
   const handleLogin = (e) => {
     e.preventDefault();
-    navigate('/dashboard');
+    setError('');
+
+    if (email === 'admin@gmail.com' && password === '123456') {
+      dispatch(login({ user: email, role: 'admin' }));
+      navigate('/dashboard');
+    } else if (email === 'dealer@gmail.com' && password === '123456') {
+      dispatch(login({ user: email, role: 'dealer' }));
+      navigate('/dashboard');
+    } else {
+      setError('Invalid email or password');
+    }
   };
 
   return (
@@ -18,6 +35,11 @@ export default function Login() {
         
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
           <form className="space-y-6" onSubmit={handleLogin}>
+            {error && (
+              <div className="p-3 bg-red-50 border border-red-100 text-red-600 text-xs font-medium rounded-lg">
+                {error}
+              </div>
+            )}
             <div>
               <label className="block text-xs font-medium text-gray-600 mb-2 uppercase tracking-wider">
                 Email Address
@@ -28,6 +50,8 @@ export default function Login() {
                 </div>
                 <input
                   type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="block w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#111827] focus:border-transparent text-sm"
                   placeholder="name@enterprise.com"
                 />
@@ -49,6 +73,8 @@ export default function Login() {
                 </div>
                 <input
                   type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="block w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#111827] focus:border-transparent text-sm"
                   placeholder="••••••••"
                 />
