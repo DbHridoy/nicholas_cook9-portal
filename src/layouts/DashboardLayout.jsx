@@ -1,19 +1,27 @@
 import React from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, ShoppingCart, FileText, LogOut, User, Menu, TrendingUp, Package, MessageSquare } from 'lucide-react';
+import { useSelector, useDispatch } from 'react-redux';
+import { logout } from '../store/authSlice';
 import Logo from '../components/Logo';
 
 export default function DashboardLayout() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { role: userRole, user: userEmail, isAuthenticated } = useSelector((state) => state.auth);
+
+  React.useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/');
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleLogout = () => {
-    // Basic logout logic
+    dispatch(logout());
     navigate('/');
   };
 
-  const userRole = 'admin'; // This should come from auth state/context
-
-  const commonNavItems = [
+  const dealerNavItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Products', path: '/dashboard/products', icon: Package },
     { name: 'Sales', path: '/dashboard/sales', icon: ShoppingCart },
@@ -21,14 +29,13 @@ export default function DashboardLayout() {
   ];
 
   const adminNavItems = [
+    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Dealers', path: '/dashboard/dealers', icon: User },
     { name: 'Sales Analytics', path: '/dashboard/analytics', icon: TrendingUp },
     { name: 'Complaints', path: '/dashboard/complaints', icon: MessageSquare },
   ];
 
-  const navItems = userRole === 'admin' 
-    ? [...commonNavItems, ...adminNavItems] 
-    : commonNavItems;
+  const navItems = userRole === 'admin' ? adminNavItems : dealerNavItems;
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] flex">
@@ -81,7 +88,10 @@ export default function DashboardLayout() {
           
           <div className="flex-1 flex justify-end">
             <div className="flex items-center gap-4">
-              <span className="text-sm font-medium text-gray-700 hidden sm:block">Admin User</span>
+              <div className="text-right hidden sm:block">
+                <p className="text-sm font-semibold text-gray-900 capitalize">{userRole} Portal</p>
+                <p className="text-xs text-gray-500">{userEmail}</p>
+              </div>
               <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
                 <User className="h-5 w-5 text-blue-600" />
               </div>
