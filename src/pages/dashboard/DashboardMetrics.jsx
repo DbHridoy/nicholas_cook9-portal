@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { Package, TrendingUp, CheckCircle, AlertCircle } from 'lucide-react';
+import { FileCheck, TrendingUp, CheckCircle, AlertCircle } from 'lucide-react';
+import { useSelector } from 'react-redux';
+import DailyStatsWidget from '../../components/DailyStatsWidget';
 
 const growthData = {
   weekly: [
@@ -33,105 +35,223 @@ const growthData = {
   ],
 };
 
-const StatCard = ({ title, value, icon: Icon, trend }) => (
-  <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-    <div className="flex items-center justify-between mb-4">
-      <h3 className="text-sm font-medium text-gray-500">{title}</h3>
-      <div className="p-2 bg-gray-50 rounded-lg">
-        <Icon className="h-5 w-5 text-[#111827]" />
+const statCards = [
+  {
+    title: 'Total Contracts Sold',
+    value: '1,284',
+    icon: FileCheck,
+    iconCls: 'stat-icon-purple',
+    trend: { value: 12.5, isPositive: true },
+  },
+  {
+    title: 'Selling Growth',
+    value: '+24%',
+    icon: TrendingUp,
+    iconCls: 'stat-icon-blue',
+    trend: { value: 4.1, isPositive: true },
+  },
+  {
+    title: 'Total Claims Resolved',
+    value: '156',
+    icon: CheckCircle,
+    iconCls: 'stat-icon-green',
+  },
+  {
+    title: 'Total Unresolved Claims',
+    value: '12',
+    icon: AlertCircle,
+    iconCls: 'stat-icon-red',
+    trend: { value: 2.4, isPositive: false },
+  },
+];
+
+const StatCard = ({ title, value, icon: Icon, iconCls, trend }) => (
+  <div
+    className="portal-card animate-fade-in"
+    style={{ padding: '20px 22px', transition: 'border-color 0.2s, transform 0.2s, box-shadow 0.2s' }}
+    onMouseEnter={e => {
+      e.currentTarget.style.transform = 'translateY(-2px)';
+      e.currentTarget.style.boxShadow = '0 8px 30px rgba(124,58,237,0.15)';
+      e.currentTarget.style.borderColor = 'rgba(124,58,237,0.3)';
+    }}
+    onMouseLeave={e => {
+      e.currentTarget.style.transform = 'translateY(0)';
+      e.currentTarget.style.boxShadow = 'none';
+      e.currentTarget.style.borderColor = 'rgba(124,58,237,0.18)';
+    }}
+  >
+    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
+      <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', margin: 0 }}>
+        {title}
+      </p>
+      <div className={iconCls} style={{ padding: 8, flexShrink: 0 }}>
+        <Icon size={16} />
       </div>
     </div>
-    <div className="flex items-baseline gap-2">
-      <span className="text-3xl font-bold text-[#111827]">{value}</span>
+    <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+      <span style={{ fontSize: 30, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+        {value}
+      </span>
       {trend && (
-        <span className={`text-sm font-medium ${trend.isPositive ? 'text-green-600' : 'text-red-600'}`}>
+        <span style={{
+          fontSize: 12, fontWeight: 600,
+          color: trend.isPositive ? '#34d399' : '#f87171',
+          background: trend.isPositive ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
+          padding: '2px 7px', borderRadius: 99,
+        }}>
           {trend.isPositive ? '+' : '-'}{trend.value}%
         </span>
       )}
     </div>
+    {trend && (
+      <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6, margin: '6px 0 0' }}>
+        vs. last period
+      </p>
+    )}
   </div>
 );
 
 export default function DashboardMetrics() {
   const [timeframe, setTimeframe] = useState('monthly');
-
-  // Calculate max sales to scale the bar chart
+  const { role: userRole } = useSelector((state) => state.auth);
   const maxSales = Math.max(...growthData[timeframe].map(d => d.sales));
 
   return (
-    <div className="space-y-6">
+    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+      {/* Page Header */}
       <div>
-        <h1 className="text-2xl font-bold text-[#111827]">Dashboard</h1>
-        <p className="text-sm text-gray-500 mt-1">Overview of your personal metrics and growth.</p>
+        <h1 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.02em' }}>
+          Dashboard
+        </h1>
+        <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4, margin: '4px 0 0' }}>
+          Overview of your {userRole === 'admin' ? 'platform-wide' : 'store'} metrics and performance.
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard 
-          title="Total Products Sold" 
-          value="1,284" 
-          icon={Package} 
-          trend={{ value: 12.5, isPositive: true }} 
-        />
-        <StatCard 
-          title="Selling Growth" 
-          value="+24%" 
-          icon={TrendingUp} 
-          trend={{ value: 4.1, isPositive: true }} 
-        />
-        <StatCard 
-          title="Total Claims Resolved" 
-          value="156" 
-          icon={CheckCircle} 
-        />
-        <StatCard 
-          title="Total Unresolved Claims" 
-          value="12" 
-          icon={AlertCircle} 
-          trend={{ value: 2.4, isPositive: false }} 
-        />
+      {/* Stat Cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
+        {statCards.map((card) => (
+          <StatCard key={card.title} {...card} />
+        ))}
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-bold text-[#111827]">Selling Growth</h2>
-          <div className="flex p-1 bg-gray-100 rounded-lg">
+      {/* Chart Card */}
+      <div className="portal-card" style={{ padding: 24 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+          <div>
+            <h2 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
+              Contract Sales Growth
+            </h2>
+            <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '3px 0 0' }}>
+              Revenue trend over time
+            </p>
+          </div>
+
+          {/* Timeframe Toggle */}
+          <div style={{
+            display: 'flex',
+            background: 'rgba(255,255,255,0.04)',
+            border: '1px solid rgba(255,255,255,0.06)',
+            borderRadius: 8,
+            padding: 3,
+            gap: 2,
+          }}>
             {['weekly', 'monthly', 'yearly'].map((tf) => (
               <button
                 key={tf}
                 onClick={() => setTimeframe(tf)}
-                className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors capitalize ${
-                  timeframe === tf 
-                    ? 'bg-white text-[#111827] shadow-sm' 
-                    : 'text-gray-500 hover:text-gray-900'
-                }`}
+                style={{
+                  padding: '5px 14px',
+                  borderRadius: 6,
+                  border: 'none',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  textTransform: 'capitalize',
+                  transition: 'all 0.2s',
+                  background: timeframe === tf
+                    ? 'linear-gradient(135deg, #7c3aed 0%, #3b82f6 100%)'
+                    : 'transparent',
+                  color: timeframe === tf ? '#fff' : 'var(--text-muted)',
+                  boxShadow: timeframe === tf ? '0 2px 10px rgba(124,58,237,0.3)' : 'none',
+                }}
               >
                 {tf}
               </button>
             ))}
           </div>
         </div>
-        
-        <div className="h-80 w-full flex items-end justify-between gap-2 pt-8 pb-2">
+
+        {/* Bar Chart */}
+        <div style={{ height: 260, display: 'flex', alignItems: 'flex-end', gap: 6, paddingTop: 20 }}>
           {growthData[timeframe].map((item, i) => {
             const heightPercent = (item.sales / maxSales) * 100;
-            
             return (
-              <div key={i} className="flex flex-col items-center flex-1 h-full justify-end group">
-                <div 
-                  className="w-full bg-[#E5E7EB] group-hover:bg-[#111827] rounded-t-sm transition-colors relative"
-                  style={{ height: `${heightPercent}%` }}
+              <div
+                key={i}
+                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, height: '100%', justifyContent: 'flex-end', gap: 8 }}
+              >
+                <div
+                  style={{
+                    width: '100%',
+                    height: `${heightPercent}%`,
+                    background: 'linear-gradient(180deg, #7c3aed 0%, #3b82f6 100%)',
+                    borderRadius: '6px 6px 0 0',
+                    opacity: 0.3,
+                    position: 'relative',
+                    cursor: 'pointer',
+                    transition: 'opacity 0.2s, transform 0.2s',
+                    minHeight: 4,
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.opacity = '1';
+                    e.currentTarget.style.boxShadow = '0 0 20px rgba(124,58,237,0.5)';
+                    e.currentTarget.querySelector('.bar-tooltip').style.opacity = '1';
+                    e.currentTarget.querySelector('.bar-tooltip').style.transform = 'translateY(0) translateX(-50%)';
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.opacity = '0.3';
+                    e.currentTarget.style.boxShadow = 'none';
+                    e.currentTarget.querySelector('.bar-tooltip').style.opacity = '0';
+                    e.currentTarget.querySelector('.bar-tooltip').style.transform = 'translateY(4px) translateX(-50%)';
+                  }}
                 >
-                  <div className="opacity-0 group-hover:opacity-100 absolute -top-10 left-1/2 -translate-x-1/2 bg-[#111827] text-white text-xs py-1.5 px-2.5 rounded shadow-lg whitespace-nowrap transition-opacity pointer-events-none z-10">
+                  <div
+                    className="bar-tooltip"
+                    style={{
+                      position: 'absolute',
+                      bottom: '100%',
+                      left: '50%',
+                      transform: 'translateY(4px) translateX(-50%)',
+                      background: 'linear-gradient(135deg, #7c3aed, #3b82f6)',
+                      color: '#fff',
+                      fontSize: 11,
+                      fontWeight: 700,
+                      padding: '4px 9px',
+                      borderRadius: 6,
+                      whiteSpace: 'nowrap',
+                      opacity: 0,
+                      transition: 'opacity 0.2s, transform 0.2s',
+                      pointerEvents: 'none',
+                      zIndex: 10,
+                      marginBottom: 6,
+                      boxShadow: '0 4px 14px rgba(124,58,237,0.4)',
+                    }}
+                  >
                     ${item.sales.toLocaleString()}
-                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[#111827]"></div>
                   </div>
                 </div>
-                <span className="text-xs text-gray-500 mt-3 truncate w-full text-center">{item.name}</span>
+                <span style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 500, textAlign: 'center' }}>
+                  {item.name}
+                </span>
               </div>
             );
           })}
         </div>
       </div>
+
+      {/* Daily Stats Widget — Dealer only */}
+      {userRole !== 'admin' && <DailyStatsWidget />}
     </div>
   );
 }
