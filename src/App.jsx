@@ -6,8 +6,13 @@ import VerifyOTP from './pages/VerifyOTP';
 import SetPassword from './pages/SetPassword';
 import ResetSuccess from './pages/ResetSuccess';
 
-// Dashboard pages
+// Layout
 import DashboardLayout from './layouts/DashboardLayout';
+
+// Shared route guard
+import ProtectedRoute from './components/ProtectedRoute';
+
+// Dealer pages
 import DashboardMetrics from './pages/dashboard/DashboardMetrics';
 import Sales from './pages/dashboard/Sales';
 import SalesDetails from './pages/dashboard/SalesDetails';
@@ -20,85 +25,116 @@ import DealerList from './pages/dashboard/admin/DealerList';
 import CreateDealer from './pages/dashboard/admin/CreateDealer';
 import SalesAnalytics from './pages/dashboard/admin/SalesAnalytics';
 import DealerDetails from './pages/dashboard/admin/DealerDetails';
-import Complaints from './pages/dashboard/admin/Complaints';
-import ComplaintDetails from './pages/dashboard/admin/ComplaintDetails';
+import Claims from './pages/dashboard/admin/Claims';
+import AdminClaimDetails from './pages/dashboard/admin/AdminClaimDetails';
 
 const router = createBrowserRouter([
+  { path: '/', element: <Login /> },
+  { path: '/forgot-password', element: <ForgotPassword /> },
+  { path: '/verify-otp', element: <VerifyOTP /> },
+  { path: '/set-password', element: <SetPassword /> },
+  { path: '/reset-success', element: <ResetSuccess /> },
   {
-    path: "/",
-    element: <Login />,
-  },
-  {
-    path: "/forgot-password",
-    element: <ForgotPassword />,
-  },
-  {
-    path: "/verify-otp",
-    element: <VerifyOTP />,
-  },
-  {
-    path: "/set-password",
-    element: <SetPassword />,
-  },
-  {
-    path: "/reset-success",
-    element: <ResetSuccess />,
-  },
-  {
-    path: "/dashboard",
+    path: '/dashboard',
     element: <DashboardLayout />,
     children: [
+      // ── Shared / Dealer routes ───────────────────────────────
       {
-        path: "",
+        path: '',
         element: <DashboardMetrics />,
       },
       {
-        path: "sales",
-        element: <Sales />,
+        path: 'sales',
+        element: (
+          <ProtectedRoute role="dealer">
+            <Sales />
+          </ProtectedRoute>
+        ),
       },
       {
-        path: "sales/:id",
-        element: <SalesDetails />,
+        path: 'sales/:id',
+        element: (
+          <ProtectedRoute role="dealer">
+            <SalesDetails />
+          </ProtectedRoute>
+        ),
       },
       {
-        path: "products",
-        element: <Products />,
+        path: 'products',
+        element: (
+          <ProtectedRoute role="dealer">
+            <Products />
+          </ProtectedRoute>
+        ),
       },
       {
-        path: "reports",
-        element: <Reports />,
+        path: 'reports',
+        element: (
+          <ProtectedRoute role="dealer">
+            <Reports />
+          </ProtectedRoute>
+        ),
       },
       {
-        path: "reports/:id",
-        element: <ClaimDetails />,
+        path: 'reports/:id',
+        element: (
+          <ProtectedRoute role="dealer">
+            <ClaimDetails />
+          </ProtectedRoute>
+        ),
       },
-      // Admin routes
+
+      // ── Admin-only routes ────────────────────────────────────
       {
-        path: "dealers",
-        element: <DealerList />,
-      },
-      {
-        path: "dealers/create",
-        element: <CreateDealer />,
-      },
-      {
-        path: "dealers/:id",
-        element: <DealerDetails />,
-      },
-      {
-        path: "analytics",
-        element: <SalesAnalytics />,
+        path: 'dealers',
+        element: (
+          <ProtectedRoute role="admin">
+            <DealerList />
+          </ProtectedRoute>
+        ),
       },
       {
-        path: "complaints",
-        element: <Complaints />,
+        path: 'dealers/create',
+        element: (
+          <ProtectedRoute role="admin">
+            <CreateDealer />
+          </ProtectedRoute>
+        ),
       },
       {
-        path: "complaints/:id",
-        element: <ComplaintDetails />,
-      }
-    ]
-  }
+        path: 'dealers/:id',
+        element: (
+          <ProtectedRoute role="admin">
+            <DealerDetails />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'analytics',
+        element: (
+          <ProtectedRoute role="admin">
+            <SalesAnalytics />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'complaints',
+        element: (
+          <ProtectedRoute role="admin">
+            <Claims />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'complaints/:id',
+        element: (
+          <ProtectedRoute role="admin">
+            <AdminClaimDetails />
+          </ProtectedRoute>
+        ),
+      },
+    ],
+  },
 ]);
 
 function App() {

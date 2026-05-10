@@ -1,10 +1,194 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 @theme {
   --font-sans: "Inter", "Roboto", "Helvetica Neue", "Arial Nova", "Nimbus Sans", Arial, sans-serif;
 }
 
-body {
-  background-color: #F8F9FA;
-  color: #111827;
+/* ─── Dark Portal Design Tokens ─────────────────────────────── */
+:root {
+  /* Backgrounds */
+  --portal-bg:         #080818;
+  --portal-sidebar:    #0e0e24;
+  --portal-surface:    #13132e;
+  --portal-card:       #181836;
+  --portal-card-hover: #1e1e42;
+  --portal-border:     rgba(124, 58, 237, 0.18);
+  --portal-border-sub: rgba(255,255,255,0.06);
+
+  /* Accents */
+  --accent-purple:     #7c3aed;
+  --accent-purple-lt:  #9d5cf6;
+  --accent-blue:       #3b82f6;
+  --accent-blue-lt:    #60a5fa;
+  --accent-glow-p:     rgba(124, 58, 237, 0.25);
+  --accent-glow-b:     rgba(59, 130, 246, 0.20);
+
+  /* Text */
+  --text-primary:      #f1f5f9;
+  --text-secondary:    #94a3b8;
+  --text-muted:        #64748b;
+
+  /* Gradients */
+  --gradient-sidebar:  linear-gradient(180deg, #0e0e24 0%, #0a0a1e 100%);
+  --gradient-card:     linear-gradient(135deg, #181836 0%, #13132e 100%);
+  --gradient-accent:   linear-gradient(135deg, #7c3aed 0%, #3b82f6 100%);
+  --gradient-active:   linear-gradient(90deg, rgba(124,58,237,0.3) 0%, rgba(59,130,246,0.12) 100%);
 }
+
+/* ─── Global Resets ──────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--portal-bg);
+  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Scrollbar ──────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--portal-bg); }
+::-webkit-scrollbar-thumb { background: rgba(124,58,237,0.4); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent-purple); }
+
+/* ─── Utility Classes ────────────────────────────────────────── */
+.portal-card {
+  background: var(--gradient-card);
+  border: 1px solid var(--portal-border);
+  border-radius: 14px;
+}
+
+.portal-input {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--portal-border-sub);
+  color: var(--text-primary);
+  border-radius: 8px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.portal-input:focus {
+  outline: none;
+  border-color: var(--accent-purple);
+  box-shadow: 0 0 0 3px var(--accent-glow-p);
+}
+.portal-input::placeholder { color: var(--text-muted); }
+
+.portal-btn-primary {
+  background: var(--gradient-accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+}
+.portal-btn-primary:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 24px var(--accent-glow-p);
+}
+
+.portal-btn-ghost {
+  background: rgba(255,255,255,0.05);
+  color: var(--text-secondary);
+  border: 1px solid var(--portal-border-sub);
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.portal-btn-ghost:hover {
+  background: rgba(124,58,237,0.12);
+  color: var(--text-primary);
+  border-color: var(--accent-purple);
+}
+
+/* ─── Stat Badge Glows ───────────────────────────────────────── */
+.stat-icon-purple {
+  background: rgba(124,58,237,0.15);
+  border-radius: 10px;
+  color: var(--accent-purple-lt);
+}
+.stat-icon-blue {
+  background: rgba(59,130,246,0.15);
+  border-radius: 10px;
+  color: var(--accent-blue-lt);
+}
+.stat-icon-green {
+  background: rgba(16,185,129,0.15);
+  border-radius: 10px;
+  color: #34d399;
+}
+.stat-icon-red {
+  background: rgba(239,68,68,0.12);
+  border-radius: 10px;
+  color: #f87171;
+}
+
+/* ─── Table Styles ───────────────────────────────────────────── */
+.portal-table thead tr {
+  background: rgba(255,255,255,0.03);
+}
+.portal-table th {
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 14px 20px;
+}
+.portal-table td {
+  padding: 14px 20px;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  border-bottom: 1px solid var(--portal-border-sub);
+}
+.portal-table tbody tr:hover td {
+  background: rgba(124,58,237,0.05);
+  color: var(--text-primary);
+}
+
+/* ─── Badge Styles ───────────────────────────────────────────── */
+.badge-resolved {
+  background: rgba(16,185,129,0.15);
+  color: #34d399;
+  border: 1px solid rgba(16,185,129,0.25);
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+.badge-unresolved {
+  background: rgba(239,68,68,0.12);
+  color: #f87171;
+  border: 1px solid rgba(239,68,68,0.22);
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+.badge-pending {
+  background: rgba(245,158,11,0.12);
+  color: #fbbf24;
+  border: 1px solid rgba(245,158,11,0.22);
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+/* ─── Animations ─────────────────────────────────────────────── */
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in { animation: fadeSlideIn 0.3s ease both; }
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 var(--accent-glow-p); }
+  50%       { box-shadow: 0 0 16px 4px var(--accent-glow-p); }
+}
+.pulse-glow { animation: pulse-glow 2.4s ease-in-out infinite; }
+
