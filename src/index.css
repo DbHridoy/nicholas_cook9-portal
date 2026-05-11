@@ -5,35 +5,40 @@
   --font-sans: "Inter", "Roboto", "Helvetica Neue", "Arial Nova", "Nimbus Sans", Arial, sans-serif;
 }
 
-/* ─── Dark Portal Design Tokens ─────────────────────────────── */
+/* ─── Ledger-Group Light Design Tokens ───────────────────────── */
 :root {
   /* Backgrounds */
-  --portal-bg:         #080818;
-  --portal-sidebar:    #0e0e24;
-  --portal-surface:    #13132e;
-  --portal-card:       #181836;
-  --portal-card-hover: #1e1e42;
-  --portal-border:     rgba(124, 58, 237, 0.18);
-  --portal-border-sub: rgba(255,255,255,0.06);
+  --portal-bg:         #f0f2f5;
+  --portal-sidebar:    #152231;
+  --portal-surface:    #1a2c40;
+  --portal-card:       #ffffff;
+  --portal-card-hover: #f8fafc;
+  --portal-border:     #e2e8f0;
+  --portal-border-sub: #e9ecef;
 
   /* Accents */
-  --accent-purple:     #7c3aed;
-  --accent-purple-lt:  #9d5cf6;
-  --accent-blue:       #3b82f6;
-  --accent-blue-lt:    #60a5fa;
-  --accent-glow-p:     rgba(124, 58, 237, 0.25);
-  --accent-glow-b:     rgba(59, 130, 246, 0.20);
+  --accent-gold:       #e8a020;
+  --accent-gold-lt:    #f5bc50;
+  --accent-blue:       #2563eb;
+  --accent-blue-lt:    #3b82f6;
+  --accent-glow-g:     rgba(232, 160, 32, 0.20);
+  --accent-glow-b:     rgba(37, 99, 235, 0.15);
+
+  /* Legacy aliases so existing component refs don't break */
+  --accent-purple:     #2563eb;
+  --accent-purple-lt:  #3b82f6;
+  --accent-glow-p:     rgba(37, 99, 235, 0.15);
 
   /* Text */
-  --text-primary:      #f1f5f9;
-  --text-secondary:    #94a3b8;
-  --text-muted:        #64748b;
+  --text-primary:      #111827;
+  --text-secondary:    #4b5563;
+  --text-muted:        #9ca3af;
 
   /* Gradients */
-  --gradient-sidebar:  linear-gradient(180deg, #0e0e24 0%, #0a0a1e 100%);
-  --gradient-card:     linear-gradient(135deg, #181836 0%, #13132e 100%);
-  --gradient-accent:   linear-gradient(135deg, #7c3aed 0%, #3b82f6 100%);
-  --gradient-active:   linear-gradient(90deg, rgba(124,58,237,0.3) 0%, rgba(59,130,246,0.12) 100%);
+  --gradient-sidebar:  linear-gradient(180deg, #152231 0%, #0f1c2b 100%);
+  --gradient-card:     #ffffff;
+  --gradient-accent:   linear-gradient(135deg, #e8a020 0%, #f5bc50 100%);
+  --gradient-active:   rgba(232, 160, 32, 0.10);
 }
 
 /* ─── Global Resets ──────────────────────────────────────────── */
@@ -50,28 +55,30 @@ body {
 
 /* ─── Scrollbar ──────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: var(--portal-bg); }
-::-webkit-scrollbar-thumb { background: rgba(124,58,237,0.4); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--accent-purple); }
+::-webkit-scrollbar-track { background: #f0f2f5; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
 /* ─── Utility Classes ────────────────────────────────────────── */
 .portal-card {
-  background: var(--gradient-card);
+  background: var(--portal-card);
   border: 1px solid var(--portal-border);
   border-radius: 14px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
 }
 
 .portal-input {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid var(--portal-border-sub);
+  background: #f9fafb;
+  border: 1px solid #d1d5db;
   color: var(--text-primary);
   border-radius: 8px;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 .portal-input:focus {
   outline: none;
-  border-color: var(--accent-purple);
-  box-shadow: 0 0 0 3px var(--accent-glow-p);
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px var(--accent-glow-b);
+  background: #fff;
 }
 .portal-input::placeholder { color: var(--text-muted); }
 
@@ -83,53 +90,59 @@ body {
   font-weight: 600;
   cursor: pointer;
   transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(232,160,32,0.30);
 }
 .portal-btn-primary:hover {
-  opacity: 0.9;
+  opacity: 0.92;
   transform: translateY(-1px);
-  box-shadow: 0 6px 24px var(--accent-glow-p);
+  box-shadow: 0 6px 20px rgba(232,160,32,0.35);
 }
 
 .portal-btn-ghost {
-  background: rgba(255,255,255,0.05);
+  background: #ffffff;
   color: var(--text-secondary);
-  border: 1px solid var(--portal-border-sub);
+  border: 1px solid #d1d5db;
   border-radius: 8px;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.2s, color 0.2s;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
 }
 .portal-btn-ghost:hover {
-  background: rgba(124,58,237,0.12);
+  background: #f9fafb;
   color: var(--text-primary);
-  border-color: var(--accent-purple);
+  border-color: #9ca3af;
 }
 
-/* ─── Stat Badge Glows ───────────────────────────────────────── */
+/* ─── Stat Badge Icons ───────────────────────────────────────── */
 .stat-icon-purple {
-  background: rgba(124,58,237,0.15);
+  background: rgba(37,99,235,0.10);
   border-radius: 10px;
-  color: var(--accent-purple-lt);
+  color: var(--accent-blue);
 }
 .stat-icon-blue {
-  background: rgba(59,130,246,0.15);
+  background: rgba(37,99,235,0.10);
   border-radius: 10px;
   color: var(--accent-blue-lt);
 }
 .stat-icon-green {
-  background: rgba(16,185,129,0.15);
+  background: rgba(16,185,129,0.10);
   border-radius: 10px;
-  color: #34d399;
+  color: #059669;
 }
 .stat-icon-red {
-  background: rgba(239,68,68,0.12);
+  background: rgba(239,68,68,0.08);
   border-radius: 10px;
-  color: #f87171;
+  color: #dc2626;
+}
+.stat-icon-gold {
+  background: rgba(232,160,32,0.12);
+  border-radius: 10px;
+  color: var(--accent-gold);
 }
 
 /* ─── Table Styles ───────────────────────────────────────────── */
 .portal-table thead tr {
-  background: rgba(255,255,255,0.03);
+  background: #f9fafb;
 }
 .portal-table th {
   color: var(--text-muted);
@@ -138,6 +151,7 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.08em;
   padding: 14px 20px;
+  border-bottom: 1px solid var(--portal-border);
 }
 .portal-table td {
   padding: 14px 20px;
@@ -146,14 +160,14 @@ body {
   border-bottom: 1px solid var(--portal-border-sub);
 }
 .portal-table tbody tr:hover td {
-  background: rgba(124,58,237,0.05);
+  background: #f9fafb;
   color: var(--text-primary);
 }
 
 /* ─── Badge Styles ───────────────────────────────────────────── */
 .badge-resolved {
-  background: rgba(16,185,129,0.15);
-  color: #34d399;
+  background: rgba(16,185,129,0.10);
+  color: #059669;
   border: 1px solid rgba(16,185,129,0.25);
   padding: 2px 10px;
   border-radius: 999px;
@@ -161,18 +175,27 @@ body {
   font-weight: 600;
 }
 .badge-unresolved {
-  background: rgba(239,68,68,0.12);
-  color: #f87171;
-  border: 1px solid rgba(239,68,68,0.22);
+  background: rgba(220,38,38,0.08);
+  color: #dc2626;
+  border: 1px solid rgba(220,38,38,0.20);
   padding: 2px 10px;
   border-radius: 999px;
   font-size: 0.72rem;
   font-weight: 600;
 }
 .badge-pending {
-  background: rgba(245,158,11,0.12);
-  color: #fbbf24;
-  border: 1px solid rgba(245,158,11,0.22);
+  background: rgba(245,158,11,0.10);
+  color: #d97706;
+  border: 1px solid rgba(245,158,11,0.25);
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+.badge-review {
+  background: rgba(37,99,235,0.08);
+  color: #2563eb;
+  border: 1px solid rgba(37,99,235,0.20);
   padding: 2px 10px;
   border-radius: 999px;
   font-size: 0.72rem;
@@ -187,8 +210,7 @@ body {
 .animate-fade-in { animation: fadeSlideIn 0.3s ease both; }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 0 0 var(--accent-glow-p); }
-  50%       { box-shadow: 0 0 16px 4px var(--accent-glow-p); }
+  0%, 100% { box-shadow: 0 0 0 0 var(--accent-glow-b); }
+  50%       { box-shadow: 0 0 12px 3px var(--accent-glow-b); }
 }
 .pulse-glow { animation: pulse-glow 2.4s ease-in-out infinite; }
-

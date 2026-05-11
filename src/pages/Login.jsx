@@ -52,7 +52,7 @@ export default function Login() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#111827] focus:border-transparent text-sm"
+                  className="block w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2563eb] focus:border-transparent text-sm outline-none"
                   placeholder="name@enterprise.com"
                 />
               </div>
@@ -63,7 +63,7 @@ export default function Login() {
                 <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider">
                   Password
                 </label>
-                <Link to="/forgot-password" className="text-xs font-medium text-[#4F6288] hover:text-[#3B4C6A]">
+                <Link to="/forgot-password" className="text-xs font-medium text-[#2563eb] hover:text-[#1d4ed8]">
                   Forgot?
                 </Link>
               </div>
@@ -75,7 +75,7 @@ export default function Login() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#111827] focus:border-transparent text-sm"
+                  className="block w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2563eb] focus:border-transparent text-sm outline-none"
                   placeholder="••••••••"
                 />
               </div>
@@ -83,7 +83,8 @@ export default function Login() {
 
             <button
               type="submit"
-              className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-[#111827] hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#111827] transition-colors"
+              className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white transition-all"
+              style={{ background: 'linear-gradient(135deg, #e8a020, #f5bc50)', boxShadow: '0 2px 10px rgba(232,160,32,0.35)' }}
             >
               Sign In
               <ArrowRight className="ml-2 h-4 w-4" />

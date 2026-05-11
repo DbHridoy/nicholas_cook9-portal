@@ -3,7 +3,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, ShoppingCart, FileText, LogOut, User,
   Menu, TrendingUp, Package, MessageSquare, X, ChevronRight,
-  FileCheck,
+  FileCheck, Bell, ChevronDown,
 } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../store/authSlice';
@@ -49,20 +49,22 @@ export default function DashboardLayout() {
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '0 20px',
-        borderBottom: '1px solid rgba(255,255,255,0.06)',
+        borderBottom: '1px solid rgba(255,255,255,0.08)',
         flexShrink: 0,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          {/* Gold "L"-style logo mark */}
           <div style={{
-            width: 32, height: 32,
-            background: 'linear-gradient(135deg, #7c3aed 0%, #3b82f6 100%)',
+            width: 34, height: 34,
+            background: 'linear-gradient(135deg, #e8a020 0%, #f5bc50 100%)',
             borderRadius: 8,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 14, fontWeight: 800, color: '#fff',
-            boxShadow: '0 4px 14px rgba(124,58,237,0.4)',
+            fontSize: 15, fontWeight: 900, color: '#fff',
+            boxShadow: '0 4px 14px rgba(232,160,32,0.40)',
+            letterSpacing: '-0.03em',
           }}>N</div>
           <div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: '#f1f5f9', letterSpacing: '-0.01em' }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#f8fafc', letterSpacing: '-0.01em' }}>
               Nicholas Cook
             </div>
             <div style={{ fontSize: 10, color: '#64748b', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
@@ -80,36 +82,15 @@ export default function DashboardLayout() {
         </button>
       </div>
 
-      {/* Role Badge */}
-      <div style={{ padding: '16px 16px 8px' }}>
-        <div style={{
-          background: userRole === 'admin'
-            ? 'rgba(124,58,237,0.12)'
-            : 'rgba(59,130,246,0.12)',
-          border: `1px solid ${userRole === 'admin' ? 'rgba(124,58,237,0.25)' : 'rgba(59,130,246,0.25)'}`,
-          borderRadius: 8,
-          padding: '8px 12px',
-          display: 'flex', alignItems: 'center', gap: 8,
-        }}>
-          <div style={{
-            width: 6, height: 6, borderRadius: '50%',
-            background: userRole === 'admin' ? '#9d5cf6' : '#60a5fa',
-          }} />
-          <span style={{ fontSize: 11, fontWeight: 600, color: userRole === 'admin' ? '#9d5cf6' : '#60a5fa', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-            {userRole === 'admin' ? 'Administrator' : 'Dealer Account'}
-          </span>
-        </div>
-      </div>
-
-      {/* Nav label */}
-      <div style={{ padding: '8px 20px 4px' }}>
-        <span style={{ fontSize: 10, fontWeight: 600, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-          Navigation
+      {/* Nav section label */}
+      <div style={{ padding: '20px 20px 6px' }}>
+        <span style={{ fontSize: 10, fontWeight: 600, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.10em' }}>
+          {userRole === 'admin' ? 'Admin' : 'Dealer'} Portal
         </span>
       </div>
 
       {/* Nav Items */}
-      <nav style={{ flex: 1, padding: '4px 12px', overflowY: 'auto' }}>
+      <nav style={{ flex: 1, padding: '4px 10px', overflowY: 'auto' }}>
         {navItems.map((item) => (
           <NavLink
             key={item.name}
@@ -121,44 +102,66 @@ export default function DashboardLayout() {
               alignItems: 'center',
               gap: 12,
               padding: '10px 14px',
-              borderRadius: 10,
+              borderRadius: 9,
               marginBottom: 2,
-              fontSize: 14,
-              fontWeight: isActive ? 600 : 500,
-              color: isActive ? '#f1f5f9' : '#64748b',
+              fontSize: 13.5,
+              fontWeight: isActive ? 600 : 400,
+              color: isActive ? '#ffffff' : '#94a3b8',
               textDecoration: 'none',
               background: isActive
-                ? 'linear-gradient(90deg, rgba(124,58,237,0.28) 0%, rgba(59,130,246,0.12) 100%)'
+                ? 'rgba(255,255,255,0.10)'
                 : 'transparent',
-              borderLeft: isActive ? '2px solid #7c3aed' : '2px solid transparent',
-              transition: 'all 0.2s ease',
+              borderLeft: 'none',
+              transition: 'all 0.18s ease',
               position: 'relative',
             })}
             className="sidebar-nav-link"
           >
             {({ isActive }) => (
               <>
-                <item.icon size={17} style={{ color: isActive ? '#9d5cf6' : '#475569', flexShrink: 0 }} />
+                <item.icon
+                  size={17}
+                  style={{ color: isActive ? '#e8a020' : '#475569', flexShrink: 0 }}
+                />
                 <span style={{ flex: 1 }}>{item.name}</span>
-                {isActive && <ChevronRight size={14} style={{ color: '#7c3aed', opacity: 0.7 }} />}
+                {isActive && (
+                  <div style={{
+                    width: 3, height: 18, borderRadius: 2,
+                    background: 'linear-gradient(180deg, #e8a020, #f5bc50)',
+                    position: 'absolute', right: 10,
+                  }} />
+                )}
               </>
             )}
           </NavLink>
         ))}
       </nav>
 
+      {/* Need Help block */}
+      <div style={{
+        margin: '0 10px 12px',
+        padding: '12px 14px',
+        background: 'rgba(255,255,255,0.04)',
+        borderRadius: 10,
+        border: '1px solid rgba(255,255,255,0.07)',
+      }}>
+        <div style={{ fontSize: 11, fontWeight: 600, color: '#cbd5e1', marginBottom: 4 }}>Need Help?</div>
+        <div style={{ fontSize: 11, color: '#64748b' }}>(866) ledger-24</div>
+        <div style={{ fontSize: 11, color: '#64748b' }}>support@portal.com</div>
+      </div>
+
       {/* User info + logout */}
-      <div style={{ padding: '12px', borderTop: '1px solid rgba(255,255,255,0.06)', flexShrink: 0 }}>
+      <div style={{ padding: '12px 10px', borderTop: '1px solid rgba(255,255,255,0.07)', flexShrink: 0 }}>
         <div style={{
           display: 'flex', alignItems: 'center', gap: 10,
           padding: '10px 12px',
-          background: 'rgba(255,255,255,0.03)',
+          background: 'rgba(255,255,255,0.05)',
           borderRadius: 10,
           marginBottom: 8,
         }}>
           <div style={{
             width: 30, height: 30, borderRadius: '50%',
-            background: 'linear-gradient(135deg, #7c3aed, #3b82f6)',
+            background: 'linear-gradient(135deg, #e8a020, #f5bc50)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: 11, fontWeight: 700, color: '#fff', flexShrink: 0,
           }}>
@@ -168,7 +171,7 @@ export default function DashboardLayout() {
             <div style={{ fontSize: 12, fontWeight: 600, color: '#e2e8f0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {userEmail}
             </div>
-            <div style={{ fontSize: 10, color: '#475569', textTransform: 'capitalize' }}>{userRole}</div>
+            <div style={{ fontSize: 10, color: '#64748b', textTransform: 'capitalize' }}>{userRole}</div>
           </div>
         </div>
 
@@ -177,16 +180,16 @@ export default function DashboardLayout() {
           style={{
             display: 'flex', alignItems: 'center', gap: 8,
             width: '100%', padding: '9px 14px',
-            background: 'rgba(239,68,68,0.08)',
-            border: '1px solid rgba(239,68,68,0.15)',
+            background: 'rgba(239,68,68,0.07)',
+            border: '1px solid rgba(239,68,68,0.14)',
             borderRadius: 9,
             color: '#f87171',
             fontSize: 13, fontWeight: 500,
             cursor: 'pointer',
             transition: 'background 0.2s',
           }}
-          onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.15)'}
-          onMouseLeave={e => e.currentTarget.style.background = 'rgba(239,68,68,0.08)'}
+          onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.14)'}
+          onMouseLeave={e => e.currentTarget.style.background = 'rgba(239,68,68,0.07)'}
         >
           <LogOut size={15} />
           Sign Out
@@ -199,7 +202,7 @@ export default function DashboardLayout() {
     <div style={{ minHeight: '100vh', background: 'var(--portal-bg)', display: 'flex' }}>
       {/* Desktop Sidebar */}
       <aside style={{
-        width: 240,
+        width: 232,
         background: 'var(--gradient-sidebar)',
         borderRight: '1px solid rgba(255,255,255,0.06)',
         display: 'none',
@@ -218,7 +221,7 @@ export default function DashboardLayout() {
           onClick={() => setMobileOpen(false)}
           style={{
             position: 'fixed', inset: 0,
-            background: 'rgba(0,0,0,0.6)',
+            background: 'rgba(0,0,0,0.45)',
             backdropFilter: 'blur(2px)',
             zIndex: 40,
           }}
@@ -227,7 +230,7 @@ export default function DashboardLayout() {
       <aside style={{
         position: 'fixed',
         top: 0, left: 0, bottom: 0,
-        width: 240,
+        width: 232,
         background: 'var(--gradient-sidebar)',
         borderRight: '1px solid rgba(255,255,255,0.06)',
         zIndex: 50,
@@ -241,72 +244,67 @@ export default function DashboardLayout() {
 
       {/* Main Content */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-        {/* Header */}
+        {/* Top Header */}
         <header style={{
           height: 60,
-          background: 'rgba(14,14,36,0.85)',
-          backdropFilter: 'blur(12px)',
-          borderBottom: '1px solid rgba(255,255,255,0.06)',
+          background: '#ffffff',
+          borderBottom: '1px solid #e2e8f0',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '0 20px',
+          padding: '0 24px',
           flexShrink: 0,
           position: 'sticky',
           top: 0,
           zIndex: 30,
+          boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
         }}>
-          <button
-            onClick={() => setMobileOpen(true)}
-            style={{
-              background: 'rgba(255,255,255,0.05)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              borderRadius: 8,
-              padding: '6px 10px',
-              color: '#94a3b8',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-            }}
-            className="mobile-menu-btn"
-          >
-            <Menu size={18} />
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <button
+              onClick={() => setMobileOpen(true)}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                padding: '6px',
+                color: '#6b7280',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
+              <Menu size={20} />
+            </button>
+            <div style={{ fontSize: 14, color: '#4b5563', display: 'flex', alignItems: 'center', gap: 6 }}>
+              Welcome back, <span style={{ fontWeight: 600, color: '#111827' }}>Touch of Color Flooring</span> 👋
+              <ChevronDown size={14} style={{ color: '#6b7280', marginTop: 2 }} />
+            </div>
+          </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            {/* Portal Label */}
-            <div style={{
-              display: 'flex', alignItems: 'center', gap: 8,
-              padding: '5px 14px',
-              background: userRole === 'admin'
-                ? 'rgba(124,58,237,0.1)'
-                : 'rgba(59,130,246,0.1)',
-              border: `1px solid ${userRole === 'admin' ? 'rgba(124,58,237,0.2)' : 'rgba(59,130,246,0.2)'}`,
-              borderRadius: 999,
-            }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+            {/* Bell Icon */}
+            <div style={{ position: 'relative', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Bell size={20} style={{ color: '#4b5563' }} />
               <div style={{
-                width: 6, height: 6, borderRadius: '50%',
-                background: userRole === 'admin' ? '#9d5cf6' : '#60a5fa',
-                animation: 'pulse-glow 2.4s ease-in-out infinite',
+                position: 'absolute', top: -2, right: -2, width: 8, height: 8,
+                background: '#ef4444', borderRadius: '50%', border: '2px solid #fff'
               }} />
-              <span style={{
-                fontSize: 12, fontWeight: 600,
-                color: userRole === 'admin' ? '#9d5cf6' : '#60a5fa',
-                textTransform: 'capitalize',
-              }}>
-                {userRole} Portal
-              </span>
             </div>
 
-            <div style={{
-              width: 32, height: 32, borderRadius: '50%',
-              background: 'linear-gradient(135deg, #7c3aed, #3b82f6)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 12, fontWeight: 700, color: '#fff',
-              cursor: 'pointer',
-              boxShadow: '0 2px 10px rgba(124,58,237,0.35)',
-            }}>
-              {userEmail ? userEmail[0].toUpperCase() : 'U'}
+            {/* Avatar & User Details */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
+              <div style={{
+                width: 32, height: 32, borderRadius: '50%',
+                background: '#111827',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 12, fontWeight: 600, color: '#fff',
+              }}>
+                JS
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <span style={{ fontSize: 13, fontWeight: 700, color: '#111827', lineHeight: 1.2 }}>John Smith</span>
+                <span style={{ fontSize: 11, color: '#6b7280', fontWeight: 500 }}>Dealer Admin</span>
+              </div>
+              <ChevronDown size={14} style={{ color: '#6b7280', marginLeft: 4 }} />
             </div>
           </div>
         </header>
@@ -322,16 +320,20 @@ export default function DashboardLayout() {
         </main>
       </div>
 
-      {/* Inline CSS for responsive sidebar */}
+      {/* Responsive + hover CSS */}
       <style>{`
         @media (min-width: 768px) {
           .desktop-sidebar { display: flex !important; }
           .mobile-menu-btn { display: none !important; }
-          .mobile-sidebar { display: none !important; }
+          .mobile-sidebar  { display: none !important; }
         }
         .sidebar-nav-link:hover {
-          background: rgba(124,58,237,0.1) !important;
+          background: rgba(255,255,255,0.07) !important;
           color: #e2e8f0 !important;
+        }
+        .mobile-close-btn { display: block !important; }
+        @media (min-width: 768px) {
+          .mobile-close-btn { display: none !important; }
         }
       `}</style>
     </div>
