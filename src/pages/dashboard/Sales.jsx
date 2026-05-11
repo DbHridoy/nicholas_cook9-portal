@@ -105,21 +105,21 @@ export default function Contracts() {
         onDragLeave={() => setDragOver(false)}
         onDrop={handleFileDrop}
         style={{
-          border: `2px dashed ${dragOver ? '#7c3aed' : uploadedFile ? 'rgba(16,185,129,0.4)' : 'rgba(124,58,237,0.25)'}`,
+          border: `2px dashed ${dragOver ? '#2563eb' : uploadedFile ? 'rgba(16,185,129,0.45)' : '#d1d5db'}`,
           borderRadius: 14,
           padding: '28px 20px',
           textAlign: 'center',
           cursor: 'pointer',
-          background: dragOver ? 'rgba(124,58,237,0.07)' : uploadedFile ? 'rgba(16,185,129,0.04)' : 'rgba(255,255,255,0.02)',
+          background: dragOver ? 'rgba(37,99,235,0.04)' : uploadedFile ? 'rgba(16,185,129,0.03)' : '#fafafa',
           transition: 'all 0.2s',
         }}
       >
-        <div style={{ display: 'inline-flex', padding: 12, background: 'rgba(124,58,237,0.1)', borderRadius: 12, marginBottom: 12 }}>
-          <FileText size={24} style={{ color: '#9d5cf6' }} />
+        <div style={{ display: 'inline-flex', padding: 12, background: 'rgba(37,99,235,0.08)', borderRadius: 12, marginBottom: 12 }}>
+          <FileText size={24} style={{ color: '#2563eb' }} />
         </div>
         {uploadedFile ? (
           <>
-            <p style={{ fontSize: 14, fontWeight: 600, color: '#34d399', margin: 0 }}>✓ {uploadedFile.name}</p>
+            <p style={{ fontSize: 14, fontWeight: 600, color: '#059669', margin: 0 }}>✓ {uploadedFile.name}</p>
             <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>{(uploadedFile.size / 1024).toFixed(1)} KB · PDF</p>
           </>
         ) : (
@@ -149,7 +149,7 @@ export default function Contracts() {
           </div>
 
           {formError && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '9px 14px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 8, fontSize: 12, color: '#f87171', marginBottom: 14 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '9px 14px', background: 'rgba(220,38,38,0.07)', border: '1px solid rgba(220,38,38,0.18)', borderRadius: 8, fontSize: 12, color: '#dc2626', marginBottom: 14 }}>
               <AlertCircle size={13} /> {formError}
             </div>
           )}
@@ -209,7 +209,7 @@ export default function Contracts() {
 
       {/* Contracts Table */}
       <div className="portal-card" style={{ overflow: 'hidden' }}>
-        <div style={{ padding: '14px 18px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ padding: '14px 18px', borderBottom: '1px solid #e9ecef', display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{ position: 'relative', flex: 1, maxWidth: 340 }}>
             <Search size={13} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }} />
             <input
@@ -247,7 +247,7 @@ export default function Contracts() {
                     </span>
                   </td>
                   <td>{contract.customer}</td>
-                  <td style={{ fontWeight: 600, color: '#34d399' }}>{contract.amount}</td>
+                  <td style={{ fontWeight: 600, color: '#059669' }}>{contract.amount}</td>
                   <td><span className={statusColor(contract.status)}>{contract.status}</span></td>
                   <td>
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, color: 'var(--text-muted)' }}>
@@ -255,7 +255,7 @@ export default function Contracts() {
                     </span>
                   </td>
                   <td style={{ textAlign: 'right' }}>
-                    <Link to={`/dashboard/sales/${contract.id}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '6px 10px', background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.2)', borderRadius: 7, color: '#60a5fa', fontSize: 12, fontWeight: 500, textDecoration: 'none' }}>
+                    <Link to={`/dashboard/sales/${contract.id}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '6px 10px', background: 'rgba(37,99,235,0.07)', border: '1px solid rgba(37,99,235,0.18)', borderRadius: 7, color: '#2563eb', fontSize: 12, fontWeight: 500, textDecoration: 'none' }}>
                       <Eye size={13} /> View
                     </Link>
                   </td>

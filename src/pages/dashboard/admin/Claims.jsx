@@ -38,13 +38,13 @@ export default function Claims() {
         </div>
         <div style={{
           display: 'flex', alignItems: 'center', gap: 6,
-          background: 'rgba(124,58,237,0.1)',
-          border: '1px solid rgba(124,58,237,0.2)',
+          background: 'rgba(37,99,235,0.08)',
+          border: '1px solid rgba(37,99,235,0.18)',
           borderRadius: 8,
           padding: '6px 14px',
         }}>
-          <MessageSquare size={14} style={{ color: '#9d5cf6' }} />
-          <span style={{ fontSize: 13, fontWeight: 600, color: '#9d5cf6' }}>
+          <MessageSquare size={14} style={{ color: '#2563eb' }} />
+          <span style={{ fontSize: 13, fontWeight: 600, color: '#2563eb' }}>
             {claims.filter(c => c.status === 'Unresolved').length} Open
           </span>
         </div>
@@ -55,7 +55,7 @@ export default function Claims() {
         {/* Filters */}
         <div style={{
           padding: '14px 18px',
-          borderBottom: '1px solid rgba(255,255,255,0.06)',
+          borderBottom: '1px solid #e9ecef',
           display: 'flex',
           flexWrap: 'wrap',
           gap: 10,
@@ -123,18 +123,18 @@ export default function Claims() {
                       <button
                         onClick={() => navigate(`/dashboard/complaints/${item.id}`)}
                         style={{
-                          background: 'rgba(124,58,237,0.1)',
-                          border: '1px solid rgba(124,58,237,0.2)',
+                          background: 'rgba(37,99,235,0.07)',
+                          border: '1px solid rgba(37,99,235,0.18)',
                           borderRadius: 7,
                           padding: '6px 10px',
-                          color: '#9d5cf6',
+                          color: '#2563eb',
                           cursor: 'pointer',
                           display: 'flex', alignItems: 'center', gap: 5,
                           fontSize: 12, fontWeight: 500,
                           transition: 'background 0.2s',
                         }}
-                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(124,58,237,0.2)'}
-                        onMouseLeave={e => e.currentTarget.style.background = 'rgba(124,58,237,0.1)'}
+                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(37,99,235,0.14)'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'rgba(37,99,235,0.07)'}
                       >
                         <Eye size={13} /> View
                       </button>

@@ -104,7 +104,7 @@ export default function DailyStatsWidget() {
             onClick={() => setAutoCalc(p => !p)}
             style={{
               width: 36, height: 20, borderRadius: 10, cursor: 'pointer',
-              background: autoCalc ? 'var(--accent-purple)' : 'rgba(255,255,255,0.1)',
+              background: autoCalc ? 'var(--accent-blue)' : '#d1d5db',
               position: 'relative', transition: 'background 0.25s',
             }}
           >
@@ -113,7 +113,7 @@ export default function DailyStatsWidget() {
               width: 16, height: 16, borderRadius: '50%',
               background: '#fff',
               transition: 'left 0.25s',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.15)',
             }} />
           </div>
         </label>
@@ -187,7 +187,7 @@ export default function DailyStatsWidget() {
           <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
             <BarChart2 size={11} style={{ display: 'inline', marginRight: 4 }} />
             Total Sales ($)
-            {autoCalc && <span style={{ color: 'var(--accent-purple)', marginLeft: 4 }}>auto</span>}
+            {autoCalc && <span style={{ color: 'var(--accent-blue)', marginLeft: 4 }}>auto</span>}
           </label>
           <input
             type="number"
@@ -206,7 +206,7 @@ export default function DailyStatsWidget() {
           <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
             <TrendingUp size={11} style={{ display: 'inline', marginRight: 4 }} />
             Conversion Rate (%)
-            {autoCalc && <span style={{ color: 'var(--accent-purple)', marginLeft: 4 }}>auto</span>}
+            {autoCalc && <span style={{ color: 'var(--accent-blue)', marginLeft: 4 }}>auto</span>}
           </label>
           <input
             type="number"
@@ -240,7 +240,7 @@ export default function DailyStatsWidget() {
           {saved ? 'Saved!' : 'Save Daily Report'}
         </button>
         {saved && (
-          <span style={{ fontSize: 12, color: '#34d399', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 5 }}>
+          <span style={{ fontSize: 12, color: '#059669', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 5 }}>
             <CheckCircle2 size={13} />
             Report saved for {savedData?.date}
           </span>
@@ -249,15 +249,15 @@ export default function DailyStatsWidget() {
 
       {/* Saved Metrics Preview */}
       {savedData && (
-        <div style={{ marginTop: 20, paddingTop: 20, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <div style={{ marginTop: 20, paddingTop: 20, borderTop: '1px solid #e9ecef' }}>
           <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>
             Report Summary — {savedData.date}
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 10 }}>
             {metrics.map((m, i) => (
               <div key={i} style={{
-                background: 'rgba(255,255,255,0.03)',
-                border: '1px solid rgba(255,255,255,0.06)',
+                background: '#f9fafb',
+                border: '1px solid #e9ecef',
                 borderRadius: 10,
                 padding: '12px 14px',
                 display: 'flex', flexDirection: 'column', gap: 6,

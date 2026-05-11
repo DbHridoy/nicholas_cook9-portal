@@ -1,257 +1,228 @@
-import React, { useState } from 'react';
-import { FileCheck, TrendingUp, CheckCircle, AlertCircle } from 'lucide-react';
+import React from 'react';
+import { FileText, CheckCircle2, DollarSign, Calendar } from 'lucide-react';
 import { useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
 import DailyStatsWidget from '../../components/DailyStatsWidget';
-
-const growthData = {
-  weekly: [
-    { name: 'Mon', sales: 4000 },
-    { name: 'Tue', sales: 3000 },
-    { name: 'Wed', sales: 2000 },
-    { name: 'Thu', sales: 2780 },
-    { name: 'Fri', sales: 1890 },
-    { name: 'Sat', sales: 2390 },
-    { name: 'Sun', sales: 3490 },
-  ],
-  monthly: [
-    { name: 'Week 1', sales: 14000 },
-    { name: 'Week 2', sales: 23000 },
-    { name: 'Week 3', sales: 12000 },
-    { name: 'Week 4', sales: 27800 },
-  ],
-  yearly: [
-    { name: 'Jan', sales: 40000 },
-    { name: 'Feb', sales: 30000 },
-    { name: 'Mar', sales: 20000 },
-    { name: 'Apr', sales: 27800 },
-    { name: 'May', sales: 18900 },
-    { name: 'Jun', sales: 23900 },
-    { name: 'Jul', sales: 34900 },
-    { name: 'Aug', sales: 42000 },
-    { name: 'Sep', sales: 31000 },
-    { name: 'Oct', sales: 25000 },
-    { name: 'Nov', sales: 38000 },
-    { name: 'Dec', sales: 45000 },
-  ],
-};
 
 const statCards = [
   {
-    title: 'Total Contracts Sold',
-    value: '1,284',
-    icon: FileCheck,
-    iconCls: 'stat-icon-purple',
-    trend: { value: 12.5, isPositive: true },
+    title: 'Total Active Contracts',
+    value: '842',
+    icon: FileText,
+    iconColor: '#64748b',
+    iconBg: '#f1f5f9',
+    trend: '+12% vs Apr 1 - Apr 30',
   },
   {
-    title: 'Selling Growth',
-    value: '+24%',
-    icon: TrendingUp,
-    iconCls: 'stat-icon-blue',
-    trend: { value: 4.1, isPositive: true },
+    title: 'Claims Submitted',
+    value: '23',
+    icon: FileText,
+    iconColor: '#2563eb',
+    iconBg: '#eff6ff',
+    trend: '+15% vs Apr 1 - Apr 30',
   },
   {
-    title: 'Total Claims Resolved',
-    value: '156',
-    icon: CheckCircle,
-    iconCls: 'stat-icon-green',
+    title: 'Claims Approved',
+    value: '17',
+    icon: CheckCircle2,
+    iconColor: '#059669',
+    iconBg: '#dcfce7',
+    trend: '+13% vs Apr 1 - Apr 30',
   },
   {
-    title: 'Total Unresolved Claims',
-    value: '12',
-    icon: AlertCircle,
-    iconCls: 'stat-icon-red',
-    trend: { value: 2.4, isPositive: false },
+    title: 'Payouts This Month',
+    value: '$18,642',
+    icon: DollarSign,
+    iconColor: '#9333ea',
+    iconBg: '#f3e8ff',
+    trend: '+18% vs Apr 1 - Apr 30',
   },
 ];
 
-const StatCard = ({ title, value, icon: Icon, iconCls, trend }) => (
-  <div
-    className="portal-card animate-fade-in"
-    style={{ padding: '20px 22px', transition: 'border-color 0.2s, transform 0.2s, box-shadow 0.2s' }}
-    onMouseEnter={e => {
-      e.currentTarget.style.transform = 'translateY(-2px)';
-      e.currentTarget.style.boxShadow = '0 8px 30px rgba(124,58,237,0.15)';
-      e.currentTarget.style.borderColor = 'rgba(124,58,237,0.3)';
-    }}
-    onMouseLeave={e => {
-      e.currentTarget.style.transform = 'translateY(0)';
-      e.currentTarget.style.boxShadow = 'none';
-      e.currentTarget.style.borderColor = 'rgba(124,58,237,0.18)';
-    }}
-  >
-    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
-      <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', margin: 0 }}>
-        {title}
-      </p>
-      <div className={iconCls} style={{ padding: 8, flexShrink: 0 }}>
-        <Icon size={16} />
-      </div>
-    </div>
-    <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-      <span style={{ fontSize: 30, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
-        {value}
-      </span>
-      {trend && (
-        <span style={{
-          fontSize: 12, fontWeight: 600,
-          color: trend.isPositive ? '#34d399' : '#f87171',
-          background: trend.isPositive ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
-          padding: '2px 7px', borderRadius: 99,
-        }}>
-          {trend.isPositive ? '+' : '-'}{trend.value}%
-        </span>
-      )}
-    </div>
-    {trend && (
-      <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6, margin: '6px 0 0' }}>
-        vs. last period
-      </p>
-    )}
-  </div>
-);
+const recentClaims = [
+  { id: 'CLM-2024-1023', customer: 'Sarah Johnson', status: 'In Review', date: 'May 31, 2024', amount: '$1,250' },
+  { id: 'CLM-2024-1022', customer: 'Mike Anderson', status: 'Pending', date: 'May 30, 2024', amount: '—' },
+  { id: 'CLM-2024-1021', customer: 'Emily Davis', status: 'Approved', date: 'May 30, 2024', amount: '$875' },
+  { id: 'CLM-2024-1020', customer: 'Robert Martinez', status: 'In Review', date: 'May 29, 2024', amount: '$2,150' },
+  { id: 'CLM-2024-1019', customer: 'Jennifer Lee', status: 'Denied', date: 'May 28, 2024', amount: '—' },
+];
+
+const getStatusBadge = (status) => {
+  switch (status) {
+    case 'In Review': return { bg: '#eff6ff', color: '#2563eb' };
+    case 'Pending':   return { bg: '#fef3c7', color: '#d97706' };
+    case 'Approved':  return { bg: '#dcfce7', color: '#059669' };
+    case 'Denied':    return { bg: '#fee2e2', color: '#dc2626' };
+    default:          return { bg: '#f1f5f9', color: '#64748b' };
+  }
+};
 
 export default function DashboardMetrics() {
-  const [timeframe, setTimeframe] = useState('monthly');
   const { role: userRole } = useSelector((state) => state.auth);
-  const maxSales = Math.max(...growthData[timeframe].map(d => d.sales));
 
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-      {/* Page Header */}
-      <div>
-        <h1 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.02em' }}>
-          Dashboard
-        </h1>
-        <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4, margin: '4px 0 0' }}>
-          Overview of your {userRole === 'admin' ? 'platform-wide' : 'store'} metrics and performance.
-        </p>
+      {/* Dashboard Header */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 14 }}>
+        <div>
+          <h1 style={{ fontSize: 26, fontWeight: 800, color: '#111827', margin: 0, letterSpacing: '-0.02em' }}>
+            Dashboard
+          </h1>
+          <p style={{ fontSize: 14, color: '#6b7280', margin: '4px 0 0' }}>
+            Here's what's happening with your protection program.
+          </p>
+        </div>
+        <button style={{
+          display: 'flex', alignItems: 'center', gap: 10,
+          background: '#ffffff', border: '1px solid #e5e7eb', borderRadius: 8,
+          padding: '8px 14px', fontSize: 13, fontWeight: 500, color: '#4b5563',
+          cursor: 'pointer', boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
+        }}>
+          May 1 – May 31, 2024
+          <Calendar size={14} style={{ color: '#9ca3af' }} />
+        </button>
       </div>
 
-      {/* Stat Cards */}
+      {/* Stat Cards Row */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
-        {statCards.map((card) => (
-          <StatCard key={card.title} {...card} />
+        {statCards.map((card, idx) => (
+          <div key={idx} className="portal-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div>
+                <p style={{ fontSize: 12, fontWeight: 600, color: '#4b5563', margin: '0 0 8px 0' }}>{card.title}</p>
+                <div style={{ fontSize: 28, fontWeight: 700, color: '#111827', letterSpacing: '-0.02em', lineHeight: 1 }}>{card.value}</div>
+              </div>
+              <div style={{ width: 42, height: 42, borderRadius: '50%', background: card.iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <card.icon size={20} style={{ color: card.iconColor }} />
+              </div>
+            </div>
+            <p style={{ fontSize: 12, fontWeight: 600, color: '#059669', margin: 0 }}>
+              {card.trend}
+            </p>
+          </div>
         ))}
       </div>
 
-      {/* Chart Card */}
-      <div className="portal-card" style={{ padding: 24 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
-          <div>
-            <h2 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
-              Contract Sales Growth
-            </h2>
-            <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '3px 0 0' }}>
-              Revenue trend over time
-            </p>
-          </div>
+      {/* Main Content Split */}
+      <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: 20, alignItems: 'start' }}>
+        {/* Claims Overview Donut Chart */}
+        <div className="portal-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', height: '100%' }}>
+          <h2 style={{ fontSize: 16, fontWeight: 700, color: '#111827', margin: '0 0 32px' }}>Claims Overview</h2>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
+            {/* CSS Donut Chart */}
+            <div style={{
+              width: 180, height: 180, borderRadius: '50%',
+              background: 'conic-gradient(#f59e0b 0% 34%, #3b82f6 34% 64%, #10b981 64% 86%, #ef4444 86% 100%)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: 'inset 0 0 0 2px #fff',
+              position: 'relative'
+            }}>
+              {/* White inner circle to make it a donut */}
+              <div style={{ 
+                width: 130, height: 130, borderRadius: '50%', 
+                background: '#ffffff', 
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                boxShadow: '0 2px 10px rgba(0,0,0,0.05)'
+              }}>
+                <span style={{ fontSize: 32, fontWeight: 800, color: '#111827', lineHeight: 1.1 }}>23</span>
+                <span style={{ fontSize: 13, color: '#6b7280', fontWeight: 500 }}>Total</span>
+              </div>
+            </div>
 
-          {/* Timeframe Toggle */}
-          <div style={{
-            display: 'flex',
-            background: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(255,255,255,0.06)',
-            borderRadius: 8,
-            padding: 3,
-            gap: 2,
-          }}>
-            {['weekly', 'monthly', 'yearly'].map((tf) => (
-              <button
-                key={tf}
-                onClick={() => setTimeframe(tf)}
-                style={{
-                  padding: '5px 14px',
-                  borderRadius: 6,
-                  border: 'none',
-                  fontSize: 12,
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  textTransform: 'capitalize',
-                  transition: 'all 0.2s',
-                  background: timeframe === tf
-                    ? 'linear-gradient(135deg, #7c3aed 0%, #3b82f6 100%)'
-                    : 'transparent',
-                  color: timeframe === tf ? '#fff' : 'var(--text-muted)',
-                  boxShadow: timeframe === tf ? '0 2px 10px rgba(124,58,237,0.3)' : 'none',
-                }}
-              >
-                {tf}
-              </button>
-            ))}
+            {/* Legend */}
+            <div style={{ width: '100%', marginTop: 32, display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {[
+                { label: 'Pending', color: '#f59e0b', count: 8, pct: '34%' },
+                { label: 'In Review', color: '#3b82f6', count: 7, pct: '30%' },
+                { label: 'Approved', color: '#10b981', count: 5, pct: '22%' },
+                { label: 'Denied', color: '#ef4444', count: 3, pct: '14%' },
+              ].map(item => (
+                <div key={item.label} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 13 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: item.color }} />
+                    <span style={{ fontWeight: 600, color: '#111827' }}>{item.label}</span>
+                  </div>
+                  <div style={{ display: 'flex', gap: 8, color: '#4b5563' }}>
+                    <span style={{ fontWeight: 600, width: 20, textAlign: 'right' }}>{item.count}</span>
+                    <span style={{ color: '#6b7280', width: 36 }}>({item.pct})</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          <div style={{ marginTop: 24, textAlign: 'right' }}>
+            <Link to="/dashboard/reports" style={{ color: '#2563eb', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
+              View all claims →
+            </Link>
           </div>
         </div>
 
-        {/* Bar Chart */}
-        <div style={{ height: 260, display: 'flex', alignItems: 'flex-end', gap: 6, paddingTop: 20 }}>
-          {growthData[timeframe].map((item, i) => {
-            const heightPercent = (item.sales / maxSales) * 100;
-            return (
-              <div
-                key={i}
-                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, height: '100%', justifyContent: 'flex-end', gap: 8 }}
-              >
-                <div
-                  style={{
-                    width: '100%',
-                    height: `${heightPercent}%`,
-                    background: 'linear-gradient(180deg, #7c3aed 0%, #3b82f6 100%)',
-                    borderRadius: '6px 6px 0 0',
-                    opacity: 0.3,
-                    position: 'relative',
-                    cursor: 'pointer',
-                    transition: 'opacity 0.2s, transform 0.2s',
-                    minHeight: 4,
-                  }}
-                  onMouseEnter={e => {
-                    e.currentTarget.style.opacity = '1';
-                    e.currentTarget.style.boxShadow = '0 0 20px rgba(124,58,237,0.5)';
-                    e.currentTarget.querySelector('.bar-tooltip').style.opacity = '1';
-                    e.currentTarget.querySelector('.bar-tooltip').style.transform = 'translateY(0) translateX(-50%)';
-                  }}
-                  onMouseLeave={e => {
-                    e.currentTarget.style.opacity = '0.3';
-                    e.currentTarget.style.boxShadow = 'none';
-                    e.currentTarget.querySelector('.bar-tooltip').style.opacity = '0';
-                    e.currentTarget.querySelector('.bar-tooltip').style.transform = 'translateY(4px) translateX(-50%)';
-                  }}
-                >
-                  <div
-                    className="bar-tooltip"
-                    style={{
-                      position: 'absolute',
-                      bottom: '100%',
-                      left: '50%',
-                      transform: 'translateY(4px) translateX(-50%)',
-                      background: 'linear-gradient(135deg, #7c3aed, #3b82f6)',
-                      color: '#fff',
-                      fontSize: 11,
-                      fontWeight: 700,
-                      padding: '4px 9px',
-                      borderRadius: 6,
-                      whiteSpace: 'nowrap',
-                      opacity: 0,
-                      transition: 'opacity 0.2s, transform 0.2s',
-                      pointerEvents: 'none',
-                      zIndex: 10,
-                      marginBottom: 6,
-                      boxShadow: '0 4px 14px rgba(124,58,237,0.4)',
-                    }}
-                  >
-                    ${item.sales.toLocaleString()}
-                  </div>
-                </div>
-                <span style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 500, textAlign: 'center' }}>
-                  {item.name}
-                </span>
-              </div>
-            );
-          })}
+        {/* Recent Claims Table */}
+        <div className="portal-card" style={{ padding: '24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+            <h2 style={{ fontSize: 16, fontWeight: 700, color: '#111827', margin: 0 }}>Recent Claims</h2>
+            <Link to="/dashboard/reports" style={{ color: '#2563eb', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
+              View all →
+            </Link>
+          </div>
+
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+            <thead>
+              <tr>
+                <th style={{ paddingBottom: 16, borderBottom: '1px solid #f3f4f6', fontSize: 12, fontWeight: 600, color: '#6b7280' }}>Claim #</th>
+                <th style={{ paddingBottom: 16, borderBottom: '1px solid #f3f4f6', fontSize: 12, fontWeight: 600, color: '#6b7280' }}>Customer</th>
+                <th style={{ paddingBottom: 16, borderBottom: '1px solid #f3f4f6', fontSize: 12, fontWeight: 600, color: '#6b7280' }}>Status</th>
+                <th style={{ paddingBottom: 16, borderBottom: '1px solid #f3f4f6', fontSize: 12, fontWeight: 600, color: '#6b7280' }}>Date Submitted</th>
+                <th style={{ paddingBottom: 16, borderBottom: '1px solid #f3f4f6', fontSize: 12, fontWeight: 600, color: '#6b7280' }}>Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              {recentClaims.map((claim, idx) => {
+                const badge = getStatusBadge(claim.status);
+                return (
+                  <tr key={idx}>
+                    <td style={{ padding: '16px 0', fontSize: 13, fontWeight: 600, color: '#111827', borderBottom: idx !== recentClaims.length - 1 ? '1px solid #f3f4f6' : 'none' }}>
+                      {claim.id}
+                    </td>
+                    <td style={{ padding: '16px 0', fontSize: 13, color: '#4b5563', fontWeight: 500, borderBottom: idx !== recentClaims.length - 1 ? '1px solid #f3f4f6' : 'none' }}>
+                      {claim.customer}
+                    </td>
+                    <td style={{ padding: '16px 0', borderBottom: idx !== recentClaims.length - 1 ? '1px solid #f3f4f6' : 'none' }}>
+                      <span style={{ 
+                        background: badge.bg, color: badge.color, 
+                        padding: '4px 10px', borderRadius: 999, 
+                        fontSize: 11, fontWeight: 600 
+                      }}>
+                        {claim.status}
+                      </span>
+                    </td>
+                    <td style={{ padding: '16px 0', fontSize: 13, color: '#4b5563', fontWeight: 500, borderBottom: idx !== recentClaims.length - 1 ? '1px solid #f3f4f6' : 'none' }}>
+                      {claim.date}
+                    </td>
+                    <td style={{ padding: '16px 0', fontSize: 13, fontWeight: 600, color: '#111827', borderBottom: idx !== recentClaims.length - 1 ? '1px solid #f3f4f6' : 'none' }}>
+                      {claim.amount}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       </div>
 
       {/* Daily Stats Widget — Dealer only */}
       {userRole !== 'admin' && <DailyStatsWidget />}
+
+      <style>{`
+        /* Make sure the layout shifts to 1 column on small screens */
+        @media (max-width: 1024px) {
+          .animate-fade-in > div:nth-child(3) {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }

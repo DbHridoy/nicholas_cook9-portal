@@ -1,0 +1,27 @@
+{
+  "default_branch": "main",
+  "branches": [
+    "admin-portal",
+    "dealer-portal",
+    "fix",
+    "fix-design",
+    "integration",
+    "main"
+  ],
+  "parent": {
+    "admin-portal": "main",
+    "dealer-portal": "main",
+    "fix": "main",
+    "fix-design": "fix",
+    "integration": "main",
+    "main": null
+  },
+  "order": [
+    "main",
+    "admin-portal",
+    "dealer-portal",
+    "fix",
+    "integration",
+    "fix-design"
+  ]
+}
