@@ -38,7 +38,7 @@ export default function AdminClaimDetails() {
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         <button
           onClick={() => navigate('/dashboard/complaints')}
-          style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 9, padding: '7px 10px', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+          style={{ background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: 9, padding: '7px 10px', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
         >
           <ArrowLeft size={16} />
         </button>
@@ -55,14 +55,14 @@ export default function AdminClaimDetails() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div className="portal-card" style={{ padding: 22 }}>
             <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 14px' }}>Claim Description</h2>
-            <div style={{ padding: '14px 16px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 10, fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.7 }}>
+            <div style={{ padding: '14px 16px', background: '#f9fafb', border: '1px solid #e9ecef', borderRadius: 10, fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.7 }}>
               {claim.description}
             </div>
           </div>
 
           <div className="portal-card" style={{ padding: 22 }}>
             <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 14px' }}>Resolution Details</h2>
-            <div style={{ padding: '14px 16px', background: isResolved ? 'rgba(16,185,129,0.07)' : 'rgba(59,130,246,0.07)', border: `1px solid ${isResolved ? 'rgba(16,185,129,0.2)' : 'rgba(59,130,246,0.2)'}`, borderRadius: 10, fontSize: 13, color: isResolved ? '#34d399' : '#60a5fa', lineHeight: 1.7 }}>
+            <div style={{ padding: '14px 16px', background: isResolved ? 'rgba(16,185,129,0.07)' : 'rgba(37,99,235,0.06)', border: `1px solid ${isResolved ? 'rgba(16,185,129,0.22)' : 'rgba(37,99,235,0.18)'}`, borderRadius: 10, fontSize: 13, color: isResolved ? '#059669' : '#2563eb', lineHeight: 1.7 }}>
               {claim.resolution}
             </div>
           </div>
@@ -72,9 +72,9 @@ export default function AdminClaimDetails() {
             {claim.history.map((item, i) => (
               <div key={i} style={{ display: 'flex', gap: 14, position: 'relative' }}>
                 {i < claim.history.length - 1 && (
-                  <div style={{ position: 'absolute', left: 9, top: 22, bottom: 0, width: 1, background: 'rgba(255,255,255,0.08)' }} />
+                  <div style={{ position: 'absolute', left: 9, top: 22, bottom: 0, width: 1, background: '#e2e8f0' }} />
                 )}
-                <div style={{ width: 20, height: 20, borderRadius: '50%', flexShrink: 0, background: i === 0 ? '#3b82f6' : (i === claim.history.length - 1 && isResolved) ? '#7c3aed' : 'rgba(255,255,255,0.15)', border: '3px solid var(--portal-card)', marginTop: 2, position: 'relative', zIndex: 1 }} />
+                <div style={{ width: 20, height: 20, borderRadius: '50%', flexShrink: 0, background: i === 0 ? '#3b82f6' : (i === claim.history.length - 1 && isResolved) ? '#e8a020' : '#e2e8f0', border: '3px solid #ffffff', marginTop: 2, position: 'relative', zIndex: 1 }} />
                 <div style={{ paddingBottom: 20 }}>
                   <p style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-primary)', margin: 0 }}>{item.event}</p>
                   <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 3 }}><Clock size={10} style={{ display: 'inline', marginRight: 3 }} />{item.date}</p>
@@ -99,14 +99,14 @@ export default function AdminClaimDetails() {
               </div>
             </div>
           ))}
-          <div style={{ marginTop: 18, paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+          <div style={{ marginTop: 18, paddingTop: 16, borderTop: '1px solid #e9ecef' }}>
             <button className="portal-btn-primary" style={{ width: '100%', padding: '10px', fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7 }}>
               <MessageSquare size={14} /> Contact Dealer
             </button>
             {isResolved && (
               <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 5, justifyContent: 'center' }}>
-                <CheckCircle2 size={13} style={{ color: '#34d399' }} />
-                <span style={{ fontSize: 12, color: '#34d399', fontWeight: 500 }}>Claim resolved</span>
+                <CheckCircle2 size={13} style={{ color: '#059669' }} />
+                <span style={{ fontSize: 12, color: '#059669', fontWeight: 500 }}>Claim resolved</span>
               </div>
             )}
           </div>
