@@ -162,6 +162,10 @@ export const api = {
     return request('/dashboard').then((body) => body.data.dashboard);
   },
 
+  getDealerDashboard() {
+    return request('/dashboard/dealer').then((body) => body.data.dashboard);
+  },
+
   getAnalytics() {
     return request('/dashboard/analytics').then((body) => body.data.analytics);
   },
@@ -218,5 +222,21 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(payload),
     }).then((body) => body.data.dailyStat);
+  },
+
+  listNotifications() {
+    return request('/notifications').then((body) => body.data);
+  },
+
+  markNotificationRead(id) {
+    return request(`/notifications/${id}/read`, {
+      method: 'PATCH',
+    }).then((body) => body.data.notification);
+  },
+
+  markAllNotificationsRead() {
+    return request('/notifications/read-all', {
+      method: 'PATCH',
+    }).then((body) => body.data);
   },
 };

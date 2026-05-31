@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, User, Package, MessageSquare, Clock } from 'lucide-react';
+import { ArrowLeft, User, Package, MessageSquare, Clock, Image as ImageIcon } from 'lucide-react';
 import { api } from '../../lib/api';
 
 const statusClass = {
@@ -16,6 +16,7 @@ const statusLabel = {
 };
 
 const formatDate = (value) => value ? new Date(value).toLocaleDateString() : '-';
+const getAttachmentName = (url, index) => decodeURIComponent(url.split('/').pop() || `Photo ${index + 1}`);
 
 export default function ClaimDetails() {
   const { id } = useParams();
@@ -49,6 +50,8 @@ export default function ClaimDetails() {
   if (!claim) {
     return <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-red-600">{error || 'Claim not found.'}</div>;
   }
+
+  const attachments = Array.isArray(claim.attachments) ? claim.attachments : [];
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
@@ -100,7 +103,7 @@ export default function ClaimDetails() {
         </div>
 
         <div className="lg:col-span-2">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 h-full">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100">
             <div className="p-6 border-b border-gray-100 flex items-center gap-2">
               <MessageSquare className="h-5 w-5 text-gray-400" />
               <h2 className="text-lg font-bold text-[#111827]">Claim Reason / Message</h2>
@@ -115,6 +118,36 @@ export default function ClaimDetails() {
               </div>
             </div>
           </div>
+
+          {attachments.length > 0 && (
+            <div className="mt-6 bg-white rounded-xl shadow-sm border border-gray-100">
+              <div className="p-6 border-b border-gray-100 flex items-center gap-2">
+                <ImageIcon className="h-5 w-5 text-gray-400" />
+                <h2 className="text-lg font-bold text-[#111827]">Claim Photos</h2>
+              </div>
+              <div className="grid gap-3 p-6 sm:grid-cols-2">
+                {attachments.map((url, index) => (
+                  <a
+                    key={url}
+                    href={url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="group block overflow-hidden rounded-lg border border-gray-100 bg-gray-50 no-underline"
+                  >
+                    <img
+                      src={url}
+                      alt={getAttachmentName(url, index)}
+                      className="h-40 w-full object-cover transition-transform group-hover:scale-[1.02]"
+                      loading="lazy"
+                    />
+                    <div className="truncate px-3 py-2 text-xs font-medium text-gray-600">
+                      {getAttachmentName(url, index)}
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

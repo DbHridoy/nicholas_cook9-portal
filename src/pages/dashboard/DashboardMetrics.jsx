@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { FileText, CheckCircle2, Users } from 'lucide-react';
+import { BadgeDollarSign, FileText, CheckCircle2, ShieldCheck, Users } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { api } from '../../lib/api';
@@ -8,6 +8,8 @@ const defaultDashboard = {
   period: { label: 'This month' },
   stats: {
     totalContracts: { value: 0, trend: 'No comparison available' },
+    activeContracts: { value: 0, trend: 'No comparison available' },
+    totalSales: { value: 0, trend: 'No comparison available' },
     claimsSubmitted: { value: 0, trend: 'No comparison available' },
     claimsApproved: { value: 0, trend: 'No comparison available' },
     users: { total: 0, admins: 0, dealers: 0, active: 0, blocked: 0 },
@@ -36,6 +38,14 @@ const normalizeDashboard = (value) => ({
     totalContracts: {
       ...defaultDashboard.stats.totalContracts,
       ...(value?.stats?.totalContracts ?? {}),
+    },
+    activeContracts: {
+      ...defaultDashboard.stats.activeContracts,
+      ...(value?.stats?.activeContracts ?? {}),
+    },
+    totalSales: {
+      ...defaultDashboard.stats.totalSales,
+      ...(value?.stats?.totalSales ?? {}),
     },
     claimsSubmitted: {
       ...defaultDashboard.stats.claimsSubmitted,
@@ -84,7 +94,9 @@ export default function DashboardMetrics() {
   useEffect(() => {
     let active = true;
 
-    api.getDashboard()
+    const loadDashboard = isAdminPortal ? api.getDashboard : api.getDealerDashboard;
+
+    loadDashboard()
       .then((data) => {
         if (active) setDashboard(normalizeDashboard(data));
       })
@@ -98,7 +110,7 @@ export default function DashboardMetrics() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [isAdminPortal]);
 
   const statCards = useMemo(() => {
     const cards = [
@@ -125,6 +137,27 @@ export default function DashboardMetrics() {
       },
     ];
 
+    if (!isAdminPortal) {
+      cards.splice(
+        1,
+        0,
+        // {
+        //   title: 'Currently Covered',
+        //   value: dashboard.stats.activeContracts.value,
+        //   icon: ShieldCheck,
+        //   iconClassName: 'bg-emerald-100 text-emerald-600',
+        //   trend: dashboard.stats.activeContracts.trend,
+        // },
+        // {
+        //   title: 'Total Sales',
+        //   value: formatAmount(dashboard.stats.totalSales.value),
+        //   icon: BadgeDollarSign,
+        //   iconClassName: 'bg-amber-100 text-amber-700',
+        //   trend: dashboard.stats.totalSales.trend,
+        // },
+      );
+    }
+
     if (isSuperAdmin) {
       cards.unshift({
         title: 'Total Users',
@@ -136,7 +169,7 @@ export default function DashboardMetrics() {
     }
 
     return cards;
-  }, [dashboard, isSuperAdmin]);
+  }, [dashboard, isAdminPortal, isSuperAdmin]);
 
   return (
     <div className="flex flex-col gap-6 animate-fade-in">

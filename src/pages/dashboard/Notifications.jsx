@@ -1,76 +1,78 @@
-import { useMemo, useState } from 'react';
-import { BellRing, CheckCheck, Filter, Mail, ShieldCheck, FileText, CircleAlert, Search, Clock3 } from 'lucide-react';
-
-const initialNotifications = [
-  {
-    id: 'n-1001',
-    title: 'New dealer account created',
-    description: 'A super admin created a new dealer account for Northstar Flooring.',
-    category: 'system',
-    timestamp: '5 minutes ago',
-    unread: true,
-    icon: ShieldCheck,
-  },
-  {
-    id: 'n-1002',
-    title: 'Claim status updated',
-    description: 'Claim #CLM-2048 moved from pending to approved.',
-    category: 'claims',
-    timestamp: '24 minutes ago',
-    unread: true,
-    icon: FileText,
-  },
-  {
-    id: 'n-1003',
-    title: 'Password reset request',
-    description: 'A password reset code was requested for finance@axisone.com.',
-    category: 'security',
-    timestamp: '1 hour ago',
-    unread: false,
-    icon: Mail,
-  },
-  {
-    id: 'n-1004',
-    title: 'Weekly claims report ready',
-    description: 'Your weekly claim summary is ready for review and export.',
-    category: 'reports',
-    timestamp: 'Today',
-    unread: false,
-    icon: BellRing,
-  },
-  {
-    id: 'n-1005',
-    title: 'High priority claim needs review',
-    description: 'Claim #CLM-2091 is still pending and flagged for review.',
-    category: 'claims',
-    timestamp: 'Yesterday',
-    unread: true,
-    icon: CircleAlert,
-  },
-  {
-    id: 'n-1006',
-    title: 'Daily stats snapshot saved',
-    description: 'Today’s daily stats were successfully recorded at 6:30 PM.',
-    category: 'reports',
-    timestamp: 'Yesterday',
-    unread: false,
-    icon: Clock3,
-  },
-];
+import { useEffect, useMemo, useState } from 'react';
+import { BellRing, CheckCheck, Filter, FileText, Search } from 'lucide-react';
+import { api } from '../../lib/api';
 
 const tabs = [
   { id: 'all', label: 'All' },
   { id: 'unread', label: 'Unread' },
   { id: 'claims', label: 'Claims' },
-  { id: 'security', label: 'Security' },
-  { id: 'reports', label: 'Reports' },
-  { id: 'system', label: 'System' },
 ];
+
+const formatRelativeTime = (value) => {
+  if (!value) return '';
+
+  const diffMs = Date.now() - new Date(value).getTime();
+  const diffMinutes = Math.max(0, Math.floor(diffMs / 60000));
+
+  if (diffMinutes < 1) return 'Just now';
+  if (diffMinutes < 60) return `${diffMinutes} minute${diffMinutes === 1 ? '' : 's'} ago`;
+
+  const diffHours = Math.floor(diffMinutes / 60);
+  if (diffHours < 24) return `${diffHours} hour${diffHours === 1 ? '' : 's'} ago`;
+
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays < 7) return `${diffDays} day${diffDays === 1 ? '' : 's'} ago`;
+
+  return new Date(value).toLocaleDateString();
+};
+
+const toNotificationView = (notification) => ({
+  id: notification._id,
+  title: notification.title,
+  description: notification.message,
+  category: notification.type === 'claim_created' ? 'claims' : 'system',
+  timestamp: formatRelativeTime(notification.createdAt),
+  unread: !notification.readAt,
+  icon: notification.type === 'claim_created' ? FileText : BellRing,
+});
+
+const notifyUnreadCount = (notifications) => {
+  window.dispatchEvent(new CustomEvent('notifications:updated', {
+    detail: {
+      unreadCount: notifications.filter((item) => item.unread).length,
+    },
+  }));
+};
 
 export default function Notifications() {
   const [activeTab, setActiveTab] = useState('all');
-  const [notifications, setNotifications] = useState(initialNotifications);
+  const [notifications, setNotifications] = useState([]);
   const [search, setSearch] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+
+    api.listNotifications()
+      .then(({ notifications: data }) => {
+        if (active) {
+          const nextNotifications = data.map(toNotificationView);
+          setNotifications(nextNotifications);
+          notifyUnreadCount(nextNotifications);
+        }
+      })
+      .catch((err) => {
+        if (active) setError(err instanceof Error ? err.message : 'Unable to load notifications.');
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const unreadCount = useMemo(() => notifications.filter((item) => item.unread).length, [notifications]);
 
@@ -87,12 +89,37 @@ export default function Notifications() {
     });
   }, [activeTab, notifications, search]);
 
-  const markAllRead = () => {
-    setNotifications((current) => current.map((item) => ({ ...item, unread: false })));
+  const markAllRead = async () => {
+    const previous = notifications;
+    const nextNotifications = notifications.map((item) => ({ ...item, unread: false }));
+    setNotifications(nextNotifications);
+    notifyUnreadCount(nextNotifications);
+
+    try {
+      await api.markAllNotificationsRead();
+    } catch (err) {
+      setNotifications(previous);
+      notifyUnreadCount(previous);
+      setError(err instanceof Error ? err.message : 'Unable to mark notifications as read.');
+    }
   };
 
-  const markOneRead = (id) => {
-    setNotifications((current) => current.map((item) => (item.id === id ? { ...item, unread: false } : item)));
+  const markOneRead = async (id) => {
+    const item = notifications.find((notification) => notification.id === id);
+    if (!item?.unread) return;
+
+    const previous = notifications;
+    const nextNotifications = notifications.map((item) => (item.id === id ? { ...item, unread: false } : item));
+    setNotifications(nextNotifications);
+    notifyUnreadCount(nextNotifications);
+
+    try {
+      await api.markNotificationRead(id);
+    } catch (err) {
+      setNotifications(previous);
+      notifyUnreadCount(previous);
+      setError(err instanceof Error ? err.message : 'Unable to mark notification as read.');
+    }
   };
 
   return (
@@ -119,6 +146,12 @@ export default function Notifications() {
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
         <div className="portal-card p-0 overflow-hidden">
+          {error && (
+            <div className="border-b border-red-600/20 bg-red-600/10 px-4.5 py-3 text-[13px] text-red-600">
+              {error}
+            </div>
+          )}
+
           <div className="flex flex-wrap items-center gap-3 border-b border-portal-border-sub px-4.5 py-3.5">
             <div className="relative flex-1">
               <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
@@ -154,7 +187,13 @@ export default function Notifications() {
           </div>
 
           <div className="divide-y divide-portal-border-sub">
-            {filtered.map((item) => {
+            {loading && (
+              <div className="px-4.5 py-12 text-center text-sm text-text-muted">
+                Loading notifications...
+              </div>
+            )}
+
+            {!loading && filtered.map((item) => {
               const Icon = item.icon;
               return (
                 <button
@@ -193,7 +232,7 @@ export default function Notifications() {
               );
             })}
 
-            {filtered.length === 0 && (
+            {!loading && filtered.length === 0 && (
               <div className="px-4.5 py-12 text-center">
                 <p className="m-0 text-sm font-semibold text-text-primary">No notifications found</p>
                 <p className="m-0 mt-1 text-[13px] text-text-muted">Try a different search or tab.</p>
@@ -202,7 +241,7 @@ export default function Notifications() {
           </div>
         </div>
 
-        <aside className="portal-card h-fit p-5">
+        {/* <aside className="portal-card h-fit p-5">
           <p className="mb-4 text-[11px] font-extrabold uppercase tracking-[0.08em] text-text-muted">Summary</p>
 
           <div className="flex flex-col gap-3">
@@ -220,16 +259,16 @@ export default function Notifications() {
             </div>
             <div className="flex items-center justify-between text-sm">
               <span className="text-text-muted">Security</span>
-              <span className="font-bold text-text-primary">{notifications.filter((item) => item.category === 'security').length}</span>
+              <span className="font-bold text-text-primary">0</span>
             </div>
           </div>
 
           <div className="mt-5 rounded-lg border border-accent-blue/20 bg-accent-blue/10 p-3.5">
             <p className="m-0 text-[12px] font-semibold leading-snug text-accent-blue">
-              Clicking a notification marks it as read. Hook this to a backend feed later if you want live delivery.
+              Clicking a notification marks it as read for your account.
             </p>
           </div>
-        </aside>
+        </aside> */}
       </div>
     </div>
   );

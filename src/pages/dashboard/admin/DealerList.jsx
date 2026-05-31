@@ -107,8 +107,8 @@ export default function DealerList() {
           </h1>
           <p className="m-0 mt-1.25 text-[13px] text-text-muted">
             {isSuperAdmin
-              ? 'Manage admin and dealer access, account status, and onboarding.'
-              : 'Manage dealer access, account status, and onboarding.'}
+              ? 'Manage admin and dealer access, account status'
+              : 'Manage dealer access, account status'}
           </p>
         </div>
         <button
@@ -125,9 +125,9 @@ export default function DealerList() {
         <StatCard label="Active" value={activeCount} subtext="Able to access portal" icon={CheckCircle2} tone="green" />
         <StatCard label="Blocked" value={blockedCount} subtext="Access currently disabled" icon={Ban} tone="red" />
         <StatCard
-          label={isSuperAdmin ? 'Admins / Dealers' : 'Onboarding'}
+          label={isSuperAdmin ? 'Admins / Dealers' : ''}
           value={loading ? '...' : isSuperAdmin ? `${adminCount} / ${dealerCount}` : Math.max(manageableUsers.length - activeCount - blockedCount, 0)}
-          subtext={isSuperAdmin ? 'Role split' : 'Pending operational setup'}
+          // subtext={isSuperAdmin ? 'Role split' : 'Pending operational setup'}
           icon={Users}
           tone="gold"
         />

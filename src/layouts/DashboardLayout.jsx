@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, FileText, LogOut, User,
   Menu, TrendingUp, MessageSquare, X,
@@ -11,6 +11,7 @@ import { api } from '../lib/api';
 
 export default function DashboardLayout() {
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
   const { role: rawRole, user: userEmail, name, isAuthenticated, avatar } = useSelector((state) => state.auth);
   const userRole = rawRole === 'super_admin' ? 'admin' : rawRole;
@@ -26,6 +27,7 @@ export default function DashboardLayout() {
       .join('') || 'PU';
   }, [name, userEmail]);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -40,6 +42,41 @@ export default function DashboardLayout() {
         });
     }
   }, [isAuthenticated, navigate, dispatch]);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setUnreadNotifications(0);
+      return undefined;
+    }
+
+    let active = true;
+
+    const loadUnreadCount = () => {
+      api.listNotifications()
+        .then((data) => {
+          if (active) setUnreadNotifications(data.unreadCount ?? 0);
+        })
+        .catch(() => {
+          if (active) setUnreadNotifications(0);
+        });
+    };
+
+    const handleNotificationUpdate = (event) => {
+      if (typeof event.detail?.unreadCount === 'number') {
+        setUnreadNotifications(event.detail.unreadCount);
+      } else {
+        loadUnreadCount();
+      }
+    };
+
+    loadUnreadCount();
+    window.addEventListener('notifications:updated', handleNotificationUpdate);
+
+    return () => {
+      active = false;
+      window.removeEventListener('notifications:updated', handleNotificationUpdate);
+    };
+  }, [isAuthenticated, location.pathname]);
 
   const handleLogout = async () => {
     try {
@@ -180,7 +217,11 @@ export default function DashboardLayout() {
               aria-label="Open notifications"
             >
               <Bell size={20} />
-              <div className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full border-2 border-white bg-red-500" />
+              {unreadNotifications > 0 && (
+                <div className="absolute -right-1.5 -top-1.5 flex min-h-4 min-w-4 items-center justify-center rounded-full border-2 border-white bg-red-500 px-1 text-[9px] font-bold leading-none text-white">
+                  {unreadNotifications > 9 ? '9+' : unreadNotifications}
+                </div>
+              )}
             </button>
 
             {/* Avatar & User Details */}

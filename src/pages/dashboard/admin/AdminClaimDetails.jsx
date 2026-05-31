@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, User, Building2, FileCheck, CheckCircle2, Clock, MessageSquare } from 'lucide-react';
+import { ArrowLeft, User, Building2, FileCheck, CheckCircle2, Clock, Image as ImageIcon, MessageSquare } from 'lucide-react';
 import { api } from '../../../lib/api';
 
 const statusLabel = {
@@ -16,6 +16,7 @@ const statusClass = {
 };
 
 const formatDate = (value) => value ? new Date(value).toLocaleString() : '-';
+const getAttachmentName = (url, index) => decodeURIComponent(url.split('/').pop() || `Photo ${index + 1}`);
 
 export default function AdminClaimDetails() {
   const { id } = useParams();
@@ -67,6 +68,7 @@ export default function AdminClaimDetails() {
   }
 
   const isResolved = claim.status === 'approved';
+  const attachments = Array.isArray(claim.attachments) ? claim.attachments : [];
 
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-5 animate-fade-in">
@@ -100,6 +102,36 @@ export default function AdminClaimDetails() {
               {claim.description}
             </div>
           </div>
+
+          {attachments.length > 0 && (
+            <div className="portal-card p-5.5">
+              <div className="mb-3.5 flex items-center gap-2">
+                <ImageIcon size={16} className="text-text-muted" />
+                <h2 className="m-0 text-sm font-bold text-text-primary">Claim Photos</h2>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {attachments.map((url, index) => (
+                  <a
+                    key={url}
+                    href={url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="block overflow-hidden rounded-[10px] border border-portal-border-sub bg-gray-50 no-underline"
+                  >
+                    <img
+                      src={url}
+                      alt={getAttachmentName(url, index)}
+                      className="h-36 w-full object-cover"
+                      loading="lazy"
+                    />
+                    <div className="truncate px-3 py-2 text-[11px] font-medium text-text-secondary">
+                      {getAttachmentName(url, index)}
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="portal-card p-5.5">
             <h2 className="mb-3.5 text-sm font-bold text-text-primary">Review Action</h2>
