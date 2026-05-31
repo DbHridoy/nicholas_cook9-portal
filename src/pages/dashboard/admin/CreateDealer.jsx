@@ -55,22 +55,21 @@ export default function CreateDealer() {
   };
 
   return (
-    <div className="animate-fade-in" style={{ maxWidth: 1060, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 22 }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+    <div className="mx-auto flex max-w-[1060px] flex-col gap-5.5 animate-fade-in">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
           <button
             onClick={() => navigate('/dashboard/dealers')}
-            className="portal-btn-ghost"
-            style={{ width: 38, height: 38, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            className="portal-btn-ghost flex h-[38px] w-[38px] items-center justify-center p-0"
             aria-label="Back to dealers"
           >
             <ArrowLeft size={17} />
           </button>
           <div>
-            <h1 style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.02em' }}>
+            <h1 className="m-0 text-2xl font-extrabold text-text-primary">
               {canCreateByRole ? 'Create User' : 'Create Dealer'}
             </h1>
-            <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '5px 0 0' }}>
+            <p className="m-0 mt-1.25 text-[13px] text-text-muted">
               {canCreateByRole
                 ? 'Add an admin or dealer account and send their temporary login credentials.'
                 : 'Add a new dealer account and send their temporary login credentials.'}
@@ -80,36 +79,35 @@ export default function CreateDealer() {
         <button
           type="button"
           onClick={() => navigate('/dashboard/dealers')}
-          className="portal-btn-ghost"
-          style={{ padding: '9px 14px', fontSize: 13 }}
+          className="portal-btn-ghost px-3.5 py-2.25 text-[13px]"
         >
           Cancel
         </button>
       </div>
 
       {error && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '11px 14px', background: 'rgba(220,38,38,0.07)', border: '1px solid rgba(220,38,38,0.18)', color: '#dc2626', borderRadius: 9, fontSize: 13, fontWeight: 600 }}>
+        <div className="flex items-center gap-2.25 rounded-[9px] border border-red-600/20 bg-red-600/10 px-3.5 py-[11px] text-[13px] font-semibold text-red-600">
           <AlertCircle size={15} />
           {error}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 320px', gap: 18, alignItems: 'start' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <div className="portal-card" style={{ padding: 22 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-              <div className="stat-icon-blue" style={{ padding: 9 }}>
+      <form onSubmit={handleSubmit} className="grid items-start gap-[18px] max-[900px]:grid-cols-1 min-[901px]:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="flex flex-col gap-4">
+          <div className="portal-card p-5.5">
+            <div className="mb-5 flex items-center gap-2.5">
+              <div className="stat-icon-blue p-2.25">
                 <Store size={17} />
               </div>
               <div>
-                <h2 style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>{selectedRoleLabel} Account</h2>
-                <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '3px 0 0' }}>The backend creates credentials automatically for the selected role.</p>
+                <h2 className="m-0 text-base font-extrabold text-text-primary">{selectedRoleLabel} Account</h2>
+                <p className="m-0 mt-0.75 text-xs text-text-muted">The backend creates credentials automatically for the selected role.</p>
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-4">
               <div>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>
+                <label className="mb-2 flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-[0.07em] text-text-muted">
                   <User size={12} />
                   Name
                 </label>
@@ -121,13 +119,12 @@ export default function CreateDealer() {
                   value={form.name}
                   onChange={(e) => setForm((current) => ({ ...current, name: e.target.value }))}
                   placeholder={selectedRole === 'admin' ? 'e.g. Morgan Taylor' : 'e.g. Skyline Flooring'}
-                  className="portal-input"
-                  style={{ width: '100%', padding: '10px 12px', fontSize: 14 }}
+                  className="portal-input w-full px-3 py-2.5 text-sm"
                 />
               </div>
 
               <div>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>
+                <label className="mb-2 flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-[0.07em] text-text-muted">
                   <Mail size={12} />
                   Primary Email
                 </label>
@@ -137,22 +134,20 @@ export default function CreateDealer() {
                   value={form.email}
                   onChange={(e) => setForm((current) => ({ ...current, email: e.target.value }))}
                   placeholder={selectedRole === 'admin' ? 'admin@example.com' : 'dealer@example.com'}
-                  className="portal-input"
-                  style={{ width: '100%', padding: '10px 12px', fontSize: 14 }}
+                  className="portal-input w-full px-3 py-2.5 text-sm"
                 />
               </div>
 
               {canCreateByRole && (
                 <div>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>
+                  <label className="mb-2 flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-[0.07em] text-text-muted">
                     <ShieldCheck size={12} />
                     Role
                   </label>
                   <select
                     value={form.role}
                     onChange={(e) => setForm((current) => ({ ...current, role: e.target.value }))}
-                    className="portal-input"
-                    style={{ width: '100%', padding: '10px 12px', fontSize: 14 }}
+                    className="portal-input w-full px-3 py-2.5 text-sm"
                   >
                     {roleOptions.map((role) => (
                       <option key={role.value} value={role.value}>
@@ -165,45 +160,43 @@ export default function CreateDealer() {
             </div>
           </div>
 
-          <div className="portal-card" style={{ padding: 22 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-              <div className="stat-icon-gold" style={{ padding: 9 }}>
+          <div className="portal-card p-5.5">
+            <div className="mb-4 flex items-center gap-2.5">
+              <div className="stat-icon-gold p-2.25">
                 <ShieldCheck size={17} />
               </div>
               <div>
-                <h2 style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>Credential Delivery</h2>
-                <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '3px 0 0' }}>The backend generates a temporary password automatically.</p>
+                <h2 className="m-0 text-base font-extrabold text-text-primary">Credential Delivery</h2>
+                <p className="m-0 mt-0.75 text-xs text-text-muted">The backend generates a temporary password automatically.</p>
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-3">
               {[
                 'A temporary password is generated server-side.',
                 `The welcome email is sent to the ${selectedRoleLabel.toLowerCase()} address.`,
                 'Creation rolls back if email delivery fails.',
               ].map((item) => (
-                <div key={item} style={{ display: 'flex', alignItems: 'flex-start', gap: 9, padding: 12, background: '#f9fafb', border: '1px solid #e9ecef', borderRadius: 9 }}>
-                  <CheckCircle2 size={15} style={{ color: '#059669', marginTop: 1, flexShrink: 0 }} />
-                  <span style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5 }}>{item}</span>
+                <div key={item} className="flex items-start gap-2.25 rounded-[9px] border border-portal-border-sub bg-gray-50 p-3">
+                  <CheckCircle2 size={15} className="mt-px shrink-0 text-emerald-600" />
+                  <span className="text-[13px] leading-normal text-text-secondary">{item}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+          <div className="flex justify-end gap-2.5">
             <button
               type="button"
               onClick={() => navigate('/dashboard/dealers')}
-              className="portal-btn-ghost"
-              style={{ padding: '10px 16px', fontSize: 13 }}
+              className="portal-btn-ghost px-4 py-2.5 text-[13px]"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting || !isValid}
-              className="portal-btn-primary"
-              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 18px', fontSize: 13, opacity: isSubmitting || !isValid ? 0.65 : 1, cursor: isSubmitting || !isValid ? 'not-allowed' : 'pointer' }}
+              className="portal-btn-primary flex items-center gap-2 px-[18px] py-2.5 text-[13px] disabled:cursor-not-allowed disabled:opacity-65"
             >
               <Save size={15} />
               {isSubmitting ? `Creating ${selectedRoleLabel}...` : `Create ${selectedRoleLabel}`}
@@ -211,40 +204,40 @@ export default function CreateDealer() {
           </div>
         </div>
 
-        <aside className="portal-card" style={{ padding: 20, position: 'sticky', top: 82 }}>
-          <p style={{ margin: '0 0 14px', fontSize: 11, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Preview</p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18 }}>
-            <div style={{ width: 46, height: 46, borderRadius: 12, background: 'linear-gradient(135deg, #152231, #334155)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 900 }}>
+        <aside className="portal-card sticky top-[82px] p-5 max-[900px]:static">
+          <p className="m-0 mb-3.5 text-[11px] font-extrabold uppercase tracking-[0.08em] text-text-muted">Preview</p>
+          <div className="mb-[18px] flex items-center gap-3">
+            <div className="flex h-[46px] w-[46px] items-center justify-center rounded-xl bg-[linear-gradient(135deg,#152231,#334155)] text-sm font-black text-white">
               {initials}
             </div>
-            <div style={{ minWidth: 0 }}>
-              <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <div className="min-w-0">
+              <div className="truncate text-sm font-extrabold text-text-primary">
                 {form.name || `New ${selectedRoleLabel}`}
               </div>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <div className="truncate text-xs text-text-muted">
                 {form.email || (selectedRole === 'admin' ? 'admin@example.com' : 'dealer@example.com')}
               </div>
             </div>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
-              <span style={{ color: 'var(--text-muted)' }}>Role</span>
-              <span style={{ color: 'var(--text-primary)', fontWeight: 700 }}>{selectedRoleLabel}</span>
+          <div className="flex flex-col gap-2.5">
+            <div className="flex justify-between text-[13px]">
+              <span className="text-text-muted">Role</span>
+              <span className="font-bold text-text-primary">{selectedRoleLabel}</span>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
-              <span style={{ color: 'var(--text-muted)' }}>Initial status</span>
+            <div className="flex justify-between text-[13px]">
+              <span className="text-text-muted">Initial status</span>
               <span className="badge-resolved">active</span>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
-              <span style={{ color: 'var(--text-muted)' }}>Password</span>
-              <span style={{ color: 'var(--text-primary)', fontWeight: 700 }}>Auto-generated</span>
+            <div className="flex justify-between text-[13px]">
+              <span className="text-text-muted">Password</span>
+              <span className="font-bold text-text-primary">Auto-generated</span>
             </div>
           </div>
 
-          <div style={{ marginTop: 18, padding: 13, background: 'rgba(37,99,235,0.07)', border: '1px solid rgba(37,99,235,0.16)', borderRadius: 9, display: 'flex', gap: 9 }}>
-            <Sparkles size={15} style={{ color: '#2563eb', flexShrink: 0, marginTop: 1 }} />
-            <p style={{ margin: 0, fontSize: 12, color: '#2563eb', lineHeight: 1.5, fontWeight: 600 }}>
+          <div className="mt-[18px] flex gap-2.25 rounded-[9px] border border-accent-blue/20 bg-accent-blue/10 p-[13px]">
+            <Sparkles size={15} className="mt-px shrink-0 text-accent-blue" />
+            <p className="m-0 text-xs font-semibold leading-normal text-accent-blue">
               {canCreateByRole
                 ? 'Super admins can create admin and dealer users. Super admin creation remains restricted to the seed flow.'
                 : 'Admins can create dealer users only. Admin account creation is restricted to super admins.'}
@@ -252,17 +245,6 @@ export default function CreateDealer() {
           </div>
         </aside>
       </form>
-
-      <style>{`
-        @media (max-width: 900px) {
-          form {
-            grid-template-columns: 1fr !important;
-          }
-          aside {
-            position: static !important;
-          }
-        }
-      `}</style>
     </div>
   );
 }

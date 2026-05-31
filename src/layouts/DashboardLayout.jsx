@@ -6,13 +6,13 @@ import {
   FileCheck, Bell, ChevronDown,
 } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
-import { logout } from '../store/authSlice';
+import { logout, setUser } from '../store/authSlice';
 import { api } from '../lib/api';
 
 export default function DashboardLayout() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { role: rawRole, user: userEmail, name, isAuthenticated } = useSelector((state) => state.auth);
+  const { role: rawRole, user: userEmail, name, isAuthenticated, avatar } = useSelector((state) => state.auth);
   const userRole = rawRole === 'super_admin' ? 'admin' : rawRole;
   const roleLabel = rawRole === 'super_admin' ? 'Super Admin' : userRole === 'admin' ? 'Admin' : 'Dealer';
   const displayName = name || userEmail || 'Portal User';
@@ -28,8 +28,18 @@ export default function DashboardLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
-    if (!isAuthenticated) navigate('/');
-  }, [isAuthenticated, navigate]);
+    if (!isAuthenticated) {
+      navigate('/');
+    } else {
+      api.getMyProfile()
+        .then((userData) => {
+          dispatch(setUser(userData));
+        })
+        .catch((err) => {
+          console.error('Failed to load profile:', err);
+        });
+    }
+  }, [isAuthenticated, navigate, dispatch]);
 
   const handleLogout = async () => {
     try {
@@ -58,32 +68,19 @@ export default function DashboardLayout() {
   const navItems = userRole === 'admin' ? adminNavItems : dealerNavItems;
 
   const renderSidebarContent = () => (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <div className="flex h-full flex-col">
       {/* Logo */}
-      <div style={{
-        height: 68,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 20px',
-        borderBottom: '1px solid rgba(255,255,255,0.08)',
-        flexShrink: 0,
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+      <div className="flex h-[68px] shrink-0 items-center justify-between border-b border-white/10 px-5">
+        <div className="flex items-center gap-2.5">
           {/* Gold "L"-style logo mark */}
-          <div style={{
-            width: 34, height: 34,
-            background: 'linear-gradient(135deg, #e8a020 0%, #f5bc50 100%)',
-            borderRadius: 8,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 15, fontWeight: 900, color: '#fff',
-            boxShadow: '0 4px 14px rgba(232,160,32,0.40)',
-            letterSpacing: '-0.03em',
-          }}>N</div>
+          <div className="flex h-[34px] w-[34px] items-center justify-center rounded-lg bg-[linear-gradient(135deg,#e8a020_0%,#f5bc50_100%)] text-[15px] font-black text-white shadow-[0_4px_14px_rgba(232,160,32,0.40)]">
+            N
+          </div>
           <div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: '#f8fafc', letterSpacing: '-0.01em' }}>
-              Axisone            </div>
-            <div style={{ fontSize: 10, color: '#64748b', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+            <div className="text-[13px] font-bold text-slate-50">
+              Axisone
+            </div>
+            <div className="text-[10px] font-medium uppercase tracking-[0.06em] text-slate-500">
               Portal
             </div>
           </div>
@@ -91,54 +88,34 @@ export default function DashboardLayout() {
         {/* Mobile close */}
         <button
           onClick={() => setMobileOpen(false)}
-          style={{ display: 'none', background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', padding: 4 }}
-          className="mobile-close-btn"
+          className="block cursor-pointer border-0 bg-transparent p-1 text-slate-500 md:hidden"
         >
           <X size={18} />
         </button>
       </div>
 
       {/* Nav Items */}
-      <nav style={{ flex: 1, padding: '20px 10px 4px', overflowY: 'auto' }}>
+      <nav className="flex-1 overflow-y-auto px-2.5 pb-1 pt-5">
         {navItems.map((item) => (
           <NavLink
             key={item.name}
             to={item.path}
             end={item.exact}
             onClick={() => setMobileOpen(false)}
-            style={({ isActive }) => ({
-              display: 'flex',
-              alignItems: 'center',
-              gap: 12,
-              padding: '10px 14px',
-              borderRadius: 9,
-              marginBottom: 2,
-              fontSize: 13.5,
-              fontWeight: isActive ? 600 : 400,
-              color: isActive ? '#ffffff' : '#94a3b8',
-              textDecoration: 'none',
-              background: isActive
-                ? 'rgba(255,255,255,0.10)'
-                : 'transparent',
-              borderLeft: 'none',
-              transition: 'all 0.18s ease',
-              position: 'relative',
-            })}
-            className="sidebar-nav-link"
+            className={({ isActive }) => [
+              'relative mb-0.5 flex items-center gap-3 rounded-[9px] px-3.5 py-2.5 text-[13.5px] no-underline transition hover:bg-white/10 hover:text-slate-200',
+              isActive ? 'bg-white/10 font-semibold text-white' : 'font-normal text-slate-400',
+            ].join(' ')}
           >
             {({ isActive }) => (
               <>
                 <item.icon
                   size={17}
-                  style={{ color: isActive ? '#e8a020' : '#475569', flexShrink: 0 }}
+                  className={`shrink-0 ${isActive ? 'text-accent-gold' : 'text-slate-600'}`}
                 />
-                <span style={{ flex: 1 }}>{item.name}</span>
+                <span className="flex-1">{item.name}</span>
                 {isActive && (
-                  <div style={{
-                    width: 3, height: 18, borderRadius: 2,
-                    background: 'linear-gradient(180deg, #e8a020, #f5bc50)',
-                    position: 'absolute', right: 10,
-                  }} />
+                  <div className="absolute right-2.5 h-[18px] w-[3px] rounded-sm bg-[linear-gradient(180deg,#e8a020,#f5bc50)]" />
                 )}
               </>
             )}
@@ -146,22 +123,10 @@ export default function DashboardLayout() {
         ))}
       </nav>
 
-      <div style={{ padding: '12px 10px', borderTop: '1px solid rgba(255,255,255,0.07)', flexShrink: 0 }}>
+      <div className="shrink-0 border-t border-white/10 px-2.5 py-3">
         <button
           onClick={handleLogout}
-          style={{
-            display: 'flex', alignItems: 'center', gap: 8,
-            width: '100%', padding: '10px 14px',
-            background: 'rgba(239,68,68,0.07)',
-            border: '1px solid rgba(239,68,68,0.14)',
-            borderRadius: 9,
-            color: '#f87171',
-            fontSize: 13, fontWeight: 500,
-            cursor: 'pointer',
-            transition: 'background 0.2s',
-          }}
-          onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.14)'}
-          onMouseLeave={e => e.currentTarget.style.background = 'rgba(239,68,68,0.07)'}
+          className="flex w-full cursor-pointer items-center gap-2 rounded-[9px] border border-red-500/15 bg-red-500/10 px-3.5 py-2.5 text-[13px] font-medium text-red-400 transition hover:bg-red-500/15"
         >
           <LogOut size={15} />
           Sign Out
@@ -171,19 +136,9 @@ export default function DashboardLayout() {
   );
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--portal-bg)', display: 'flex' }}>
+    <div className="flex min-h-screen bg-portal-bg">
       {/* Desktop Sidebar */}
-      <aside style={{
-        width: 232,
-        background: 'var(--gradient-sidebar)',
-        borderRight: '1px solid rgba(255,255,255,0.06)',
-        display: 'none',
-        flexDirection: 'column',
-        flexShrink: 0,
-        position: 'sticky',
-        top: 0,
-        height: '100vh',
-      }} className="desktop-sidebar">
+      <aside className="sticky top-0 hidden h-screen w-[232px] shrink-0 flex-col border-r border-white/10 bg-[linear-gradient(180deg,#152231_0%,#0f1c2b_100%)] md:flex">
         {renderSidebarContent()}
       </aside>
 
@@ -191,139 +146,69 @@ export default function DashboardLayout() {
       {mobileOpen && (
         <div
           onClick={() => setMobileOpen(false)}
-          style={{
-            position: 'fixed', inset: 0,
-            background: 'rgba(0,0,0,0.45)',
-            backdropFilter: 'blur(2px)',
-            zIndex: 40,
-          }}
+          className="fixed inset-0 z-40 bg-black/45 backdrop-blur-[2px]"
         />
       )}
-      <aside style={{
-        position: 'fixed',
-        top: 0, left: 0, bottom: 0,
-        width: 232,
-        background: 'var(--gradient-sidebar)',
-        borderRight: '1px solid rgba(255,255,255,0.06)',
-        zIndex: 50,
-        transform: mobileOpen ? 'translateX(0)' : 'translateX(-100%)',
-        transition: 'transform 0.3s cubic-bezier(0.4,0,0.2,1)',
-        display: 'flex',
-        flexDirection: 'column',
-      }} className="mobile-sidebar">
+      <aside className={`fixed inset-y-0 left-0 z-50 flex w-[232px] flex-col border-r border-white/10 bg-[linear-gradient(180deg,#152231_0%,#0f1c2b_100%)] transition-transform duration-300 ease-out md:hidden ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         {renderSidebarContent()}
       </aside>
 
       {/* Main Content */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+      <div className="flex min-w-0 flex-1 flex-col">
         {/* Top Header */}
-        <header style={{
-          height: 60,
-          background: '#ffffff',
-          borderBottom: '1px solid #e2e8f0',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '0 24px',
-          flexShrink: 0,
-          position: 'sticky',
-          top: 0,
-          zIndex: 30,
-          boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+        <header className="sticky top-0 z-30 flex h-[60px] shrink-0 items-center justify-between border-b border-portal-border bg-white px-6 shadow-sm max-sm:px-3.5">
+          <div className="flex min-w-0 items-center gap-3.5">
             <button
               onClick={() => setMobileOpen(true)}
-              className="mobile-menu-btn"
-              style={{
-                background: 'transparent',
-                border: 'none',
-                padding: '6px',
-                color: '#6b7280',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-              }}
+              className="flex cursor-pointer items-center border-0 bg-transparent p-1.5 text-gray-500 md:hidden"
             >
               <Menu size={20} />
             </button>
-            <div style={{ fontSize: 14, color: '#4b5563', display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
-              <span style={{ color: '#6b7280' }}>Welcome back,</span>
-              <span style={{ fontWeight: 700, color: '#111827', maxWidth: 240, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayName}</span>
-              <ChevronDown size={14} style={{ color: '#6b7280', marginTop: 2 }} />
+            <div className="flex min-w-0 items-center gap-1.5 text-sm text-text-secondary">
+              <span className="text-gray-500 max-sm:hidden">Welcome back,</span>
+              <span className="max-w-60 truncate font-bold text-text-primary">{displayName}</span>
+              <ChevronDown size={14} className="mt-0.5 text-gray-500" />
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+          <div className="flex items-center gap-5 max-sm:gap-3">
             {/* Bell Icon */}
-            <div style={{ position: 'relative', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Bell size={20} style={{ color: '#4b5563' }} />
-              <div style={{
-                position: 'absolute', top: -2, right: -2, width: 8, height: 8,
-                background: '#ef4444', borderRadius: '50%', border: '2px solid #fff'
-              }} />
-            </div>
+            <button
+              type="button"
+              onClick={() => navigate('/dashboard/notifications')}
+              className="relative flex cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-1 text-text-secondary transition hover:bg-slate-100 hover:text-text-primary"
+              aria-label="Open notifications"
+            >
+              <Bell size={20} />
+              <div className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full border-2 border-white bg-red-500" />
+            </button>
 
             {/* Avatar & User Details */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
-              <div style={{
-                width: 32, height: 32, borderRadius: '50%',
-                background: '#111827',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 12, fontWeight: 600, color: '#fff',
-              }}>
-                {avatarText}
+            <div
+              onClick={() => navigate('/dashboard/profile')}
+              className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2 py-1 transition hover:scale-[1.02] hover:bg-slate-100"
+            >
+              <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-text-primary text-xs font-semibold text-white">
+                {avatar ? (
+                  <img src={avatar} alt={displayName} className="h-full w-full object-cover" />
+                ) : (
+                  avatarText
+                )}
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <span style={{ fontSize: 13, fontWeight: 700, color: '#111827', lineHeight: 1.2, maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayName}</span>
-                <span style={{ fontSize: 11, color: '#6b7280', fontWeight: 500 }}>{roleLabel}</span>
+              <div className="flex flex-col max-sm:hidden">
+                <span className="max-w-45 truncate text-[13px] font-bold leading-tight text-text-primary">{displayName}</span>
+                <span className="text-[11px] font-medium text-gray-500">{roleLabel}</span>
               </div>
-              <ChevronDown size={14} style={{ color: '#6b7280', marginLeft: 4 }} />
+              <ChevronDown size={14} className="ml-1 text-gray-500 max-sm:hidden" />
             </div>
           </div>
         </header>
 
         {/* Page Content */}
-        <main style={{
-          flex: 1,
-          overflowY: 'auto',
-          padding: '28px 24px',
-          background: 'var(--portal-bg)',
-        }}>
+        <main className="flex-1 overflow-y-auto bg-portal-bg px-6 py-7 max-sm:px-3.5 max-sm:py-5">
           <Outlet />
         </main>
       </div>
-
-      {/* Responsive + hover CSS */}
-      <style>{`
-        @media (min-width: 768px) {
-          .desktop-sidebar { display: flex !important; }
-          .mobile-menu-btn { display: none !important; }
-          .mobile-sidebar  { display: none !important; }
-        }
-        @media (max-width: 640px) {
-          header {
-            padding: 0 14px !important;
-          }
-          header > div:last-child {
-            gap: 12px !important;
-          }
-          header > div:last-child > div:last-child > div:last-child {
-            display: none !important;
-          }
-          main {
-            padding: 20px 14px !important;
-          }
-        }
-        .sidebar-nav-link:hover {
-          background: rgba(255,255,255,0.07) !important;
-          color: #e2e8f0 !important;
-        }
-        .mobile-close-btn { display: block !important; }
-        @media (min-width: 768px) {
-          .mobile-close-btn { display: none !important; }
-        }
-      `}</style>
     </div>
   );
 }

@@ -34,7 +34,11 @@ export default function DealerDetails() {
   if (loading) return <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">Loading user...</div>;
   if (!dealer) return <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-red-600">{error || 'User not found.'}</div>;
 
-  const maxContracts = Math.max(...dealer.performance.map((item) => item.contracts), 1);
+  const isDealer = dealer.role === 'dealer';
+  const maxContracts = isDealer ? Math.max(...(dealer.performance || []).map((item) => item.contracts), 1) : 1;
+  const pageDescription = isDealer
+    ? 'Portal account and dealer performance overview.'
+    : 'Basic portal account information.';
 
   return (
     <div className="space-y-6">
@@ -44,7 +48,7 @@ export default function DealerDetails() {
         </button>
         <div>
           <h1 className="text-2xl font-bold text-[#111827]">{dealer.name}</h1>
-          <p className="text-sm text-gray-500">Portal account and dealer performance overview.</p>
+          <p className="text-sm text-gray-500">{pageDescription}</p>
         </div>
       </div>
 
@@ -61,40 +65,44 @@ export default function DealerDetails() {
           </div>
         </div>
 
-        <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex items-center gap-4">
-            <div className="p-2 bg-blue-50 text-blue-600 rounded-lg"><ShoppingCart className="h-5 w-5" /></div>
-            <div><p className="text-xs font-medium text-gray-500">Total Contracts</p><p className="text-xl font-bold text-[#111827]">{dealer.stats.totalContracts}</p></div>
+        {isDealer && (
+          <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex items-center gap-4">
+              <div className="p-2 bg-blue-50 text-blue-600 rounded-lg"><ShoppingCart className="h-5 w-5" /></div>
+              <div><p className="text-xs font-medium text-gray-500">Total Contracts</p><p className="text-xl font-bold text-[#111827]">{dealer.stats.totalContracts}</p></div>
+            </div>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex items-center gap-4">
+              <div className="p-2 bg-green-50 text-green-600 rounded-lg"><CheckCircle className="h-5 w-5" /></div>
+              <div><p className="text-xs font-medium text-gray-500">Total Sales</p><p className="text-xl font-bold text-[#111827]">{formatMoney(dealer.stats.totalSales)}</p></div>
+            </div>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex items-center gap-4">
+              <div className="p-2 bg-yellow-50 text-yellow-600 rounded-lg"><Clock className="h-5 w-5" /></div>
+              <div><p className="text-xs font-medium text-gray-500">Pending Claims</p><p className="text-xl font-bold text-[#111827]">{dealer.stats.pendingClaims}</p></div>
+            </div>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex items-center gap-4">
+              <div className="p-2 bg-red-50 text-red-600 rounded-lg"><AlertTriangle className="h-5 w-5" /></div>
+              <div><p className="text-xs font-medium text-gray-500">Denied Claims</p><p className="text-xl font-bold text-[#111827]">{dealer.stats.deniedClaims}</p></div>
+            </div>
           </div>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex items-center gap-4">
-            <div className="p-2 bg-green-50 text-green-600 rounded-lg"><CheckCircle className="h-5 w-5" /></div>
-            <div><p className="text-xs font-medium text-gray-500">Total Sales</p><p className="text-xl font-bold text-[#111827]">{formatMoney(dealer.stats.totalSales)}</p></div>
-          </div>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex items-center gap-4">
-            <div className="p-2 bg-yellow-50 text-yellow-600 rounded-lg"><Clock className="h-5 w-5" /></div>
-            <div><p className="text-xs font-medium text-gray-500">Pending Claims</p><p className="text-xl font-bold text-[#111827]">{dealer.stats.pendingClaims}</p></div>
-          </div>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex items-center gap-4">
-            <div className="p-2 bg-red-50 text-red-600 rounded-lg"><AlertTriangle className="h-5 w-5" /></div>
-            <div><p className="text-xs font-medium text-gray-500">Denied Claims</p><p className="text-xl font-bold text-[#111827]">{dealer.stats.deniedClaims}</p></div>
-          </div>
-        </div>
+        )}
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-        <h2 className="text-lg font-bold text-[#111827] mb-6">Recent Performance</h2>
-        <div className="h-64 flex items-end gap-2 pt-8 pb-2 px-4 border-b border-gray-100">
-          {dealer.performance.map((item) => {
-            const height = Math.max((item.contracts / maxContracts) * 100, 4);
-            return (
-              <div key={item.month} className="flex-1 flex flex-col items-center group relative h-full justify-end">
-                <div className="w-full bg-[#111827] rounded-t-sm transition-all duration-300 group-hover:bg-blue-600" style={{ height: `${height}%` }} />
-                <span className="text-[10px] text-gray-500 mt-2">{item.month}</span>
-              </div>
-            );
-          })}
+      {isDealer && (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <h2 className="text-lg font-bold text-[#111827] mb-6">Recent Performance</h2>
+          <div className="h-64 flex items-end gap-2 pt-8 pb-2 px-4 border-b border-gray-100">
+            {(dealer.performance || []).map((item) => {
+              const height = Math.max((item.contracts / maxContracts) * 100, 4);
+              return (
+                <div key={item.month} className="flex-1 flex flex-col items-center group relative h-full justify-end">
+                  <div className="w-full bg-[#111827] rounded-t-sm transition-all duration-300 group-hover:bg-blue-600" style={{ height: `${height}%` }} />
+                  <span className="text-[10px] text-gray-500 mt-2">{item.month}</span>
+                </div>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

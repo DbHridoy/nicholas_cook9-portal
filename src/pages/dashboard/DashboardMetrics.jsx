@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import { FileText, CheckCircle2, Calendar, Users } from 'lucide-react';
+import { FileText, CheckCircle2, Users } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import DailyStatsWidget from '../../components/DailyStatsWidget';
 import { api } from '../../lib/api';
 
 const defaultDashboard = {
@@ -66,10 +65,10 @@ const formatAmount = (value) => typeof value === 'number'
 
 const getStatusBadge = (status) => {
   switch (status) {
-    case 'pending': return { bg: '#fef3c7', color: '#d97706', label: 'Pending' };
-    case 'approved': return { bg: '#dcfce7', color: '#059669', label: 'Approved' };
-    case 'denied': return { bg: '#fee2e2', color: '#dc2626', label: 'Denied' };
-    default:          return { bg: '#f1f5f9', color: '#64748b' };
+    case 'pending': return { className: 'bg-amber-100 text-amber-600', label: 'Pending' };
+    case 'approved': return { className: 'bg-emerald-100 text-emerald-600', label: 'Approved' };
+    case 'denied': return { className: 'bg-red-100 text-red-600', label: 'Denied' };
+    default:          return { className: 'bg-slate-100 text-slate-500' };
   }
 };
 
@@ -107,24 +106,21 @@ export default function DashboardMetrics() {
         title: 'Total Active Contracts',
         value: dashboard.stats.totalContracts.value,
         icon: FileText,
-        iconColor: '#64748b',
-        iconBg: '#f1f5f9',
+        iconClassName: 'bg-slate-100 text-slate-500',
         trend: dashboard.stats.totalContracts.trend,
       },
       {
         title: 'Claims Submitted',
         value: dashboard.stats.claimsSubmitted.value,
         icon: FileText,
-        iconColor: '#2563eb',
-        iconBg: '#eff6ff',
+        iconClassName: 'bg-blue-50 text-accent-blue',
         trend: dashboard.stats.claimsSubmitted.trend,
       },
       {
         title: 'Claims Approved',
         value: dashboard.stats.claimsApproved.value,
         icon: CheckCircle2,
-        iconColor: '#059669',
-        iconBg: '#dcfce7',
+        iconClassName: 'bg-emerald-100 text-emerald-600',
         trend: dashboard.stats.claimsApproved.trend,
       },
     ];
@@ -134,8 +130,7 @@ export default function DashboardMetrics() {
         title: 'Total Users',
         value: dashboard.stats.users.total,
         icon: Users,
-        iconColor: '#9333ea',
-        iconBg: '#f3e8ff',
+        iconClassName: 'bg-purple-100 text-purple-600',
         trend: `${dashboard.stats.users.admins} admins / ${dashboard.stats.users.dealers} dealers`,
       });
     }
@@ -144,50 +139,42 @@ export default function DashboardMetrics() {
   }, [dashboard, isSuperAdmin]);
 
   return (
-    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+    <div className="flex flex-col gap-6 animate-fade-in">
       {/* Dashboard Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 14 }}>
+      <div className="flex flex-wrap items-center justify-between gap-3.5">
         <div>
-          <h1 style={{ fontSize: 26, fontWeight: 800, color: '#111827', margin: 0, letterSpacing: '-0.02em' }}>
+          <h1 className="m-0 text-[26px] font-extrabold text-text-primary">
             Dashboard
           </h1>
-          <p style={{ fontSize: 14, color: '#6b7280', margin: '4px 0 0' }}>
+          <p className="m-0 mt-1 text-sm text-gray-500">
             {isSuperAdmin
               ? 'Here is the full portal view across admins, dealers, contracts, and claims.'
               : "Here's what's happening with your protection program."}
           </p>
         </div>
-        <button style={{
-          display: 'flex', alignItems: 'center', gap: 10,
-          background: '#ffffff', border: '1px solid #e5e7eb', borderRadius: 8,
-          padding: '8px 14px', fontSize: 13, fontWeight: 500, color: '#4b5563',
-          cursor: 'pointer', boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
-        }}>
-          {dashboard.period.label}
-          <Calendar size={14} style={{ color: '#9ca3af' }} />
-        </button>
+        
       </div>
 
       {error && (
-        <div style={{ padding: '10px 14px', border: '1px solid rgba(220,38,38,0.18)', background: 'rgba(220,38,38,0.07)', color: '#dc2626', borderRadius: 8, fontSize: 13 }}>
+        <div className="rounded-lg border border-red-600/20 bg-red-600/10 px-3.5 py-2.5 text-[13px] text-red-600">
           {error}
         </div>
       )}
 
       {/* Stat Cards Row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4">
         {statCards.map((card, idx) => (
-          <div key={idx} className="portal-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div key={idx} className="portal-card flex flex-col gap-4 p-6">
+            <div className="flex items-start justify-between">
               <div>
-                <p style={{ fontSize: 12, fontWeight: 600, color: '#4b5563', margin: '0 0 8px 0' }}>{card.title}</p>
-                <div style={{ fontSize: 28, fontWeight: 700, color: '#111827', letterSpacing: '-0.02em', lineHeight: 1 }}>{loading ? '...' : card.value}</div>
+                <p className="m-0 mb-2 text-xs font-semibold text-text-secondary">{card.title}</p>
+                <div className="text-[28px] font-bold leading-none text-text-primary">{loading ? '...' : card.value}</div>
               </div>
-              <div style={{ width: 42, height: 42, borderRadius: '50%', background: card.iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <card.icon size={20} style={{ color: card.iconColor }} />
+              <div className={`flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-full ${card.iconClassName}`}>
+                <card.icon size={20} />
               </div>
             </div>
-            <p style={{ fontSize: 12, fontWeight: 600, color: '#059669', margin: 0 }}>
+            <p className="m-0 text-xs font-semibold text-emerald-600">
               {card.trend}
             </p>
           </div>
@@ -195,12 +182,12 @@ export default function DashboardMetrics() {
       </div>
 
       {/* Main Content Split */}
-      <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: 20, alignItems: 'start' }}>
+      <div className="grid items-start gap-5 lg:grid-cols-[320px_minmax(0,1fr)]">
         {/* Claims Overview Donut Chart */}
-        <div className="portal-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', height: '100%' }}>
-          <h2 style={{ fontSize: 16, fontWeight: 700, color: '#111827', margin: '0 0 32px' }}>Claims Overview</h2>
+        <div className="portal-card flex h-full flex-col p-6">
+          <h2 className="mb-8 text-base font-bold text-text-primary">Claims Overview</h2>
           
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
+          <div className="flex flex-1 flex-col items-center">
             {/* CSS Donut Chart */}
             <div style={{
               width: 180, height: 180, borderRadius: '50%',
@@ -210,99 +197,90 @@ export default function DashboardMetrics() {
                   return `${item.color} ${start}% ${start + item.pct}%`;
                 }).join(', ')})`
                 : '#f1f5f9',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
               boxShadow: 'inset 0 0 0 2px #fff',
               position: 'relative'
-            }}>
+            }} className="flex h-[180px] w-[180px] items-center justify-center rounded-full">
               {/* White inner circle to make it a donut */}
-              <div style={{ 
-                width: 130, height: 130, borderRadius: '50%', 
-                background: '#ffffff', 
-                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                boxShadow: '0 2px 10px rgba(0,0,0,0.05)'
-              }}>
-                <span style={{ fontSize: 32, fontWeight: 800, color: '#111827', lineHeight: 1.1 }}>{loading ? '...' : dashboard.claimsOverview.total}</span>
-                <span style={{ fontSize: 13, color: '#6b7280', fontWeight: 500 }}>Total</span>
+              <div className="flex h-[130px] w-[130px] flex-col items-center justify-center rounded-full bg-white shadow-[0_2px_10px_rgba(0,0,0,0.05)]">
+                <span className="text-[32px] font-extrabold leading-tight text-text-primary">{loading ? '...' : dashboard.claimsOverview.total}</span>
+                <span className="text-[13px] font-medium text-gray-500">Total</span>
               </div>
             </div>
 
             {/* Legend */}
-            <div style={{ width: '100%', marginTop: 32, display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div className="mt-8 flex w-full flex-col gap-3">
               {dashboard.claimsOverview.byStatus.map(item => (
-                <div key={item.label} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 13 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: item.color }} />
-                    <span style={{ fontWeight: 600, color: '#111827' }}>{item.label}</span>
+                <div key={item.label} className="flex items-center justify-between text-[13px]">
+                  <div className="flex items-center gap-2">
+                    <div className="h-2 w-2 rounded-full" style={{ background: item.color }} />
+                    <span className="font-semibold text-text-primary">{item.label}</span>
                   </div>
-                  <div style={{ display: 'flex', gap: 8, color: '#4b5563' }}>
-                    <span style={{ fontWeight: 600, width: 20, textAlign: 'right' }}>{item.count}</span>
-                    <span style={{ color: '#6b7280', width: 36 }}>({item.pct}%)</span>
+                  <div className="flex gap-2 text-text-secondary">
+                    <span className="w-5 text-right font-semibold">{item.count}</span>
+                    <span className="w-9 text-gray-500">({item.pct}%)</span>
                   </div>
                 </div>
               ))}
             </div>
           </div>
           
-          <div style={{ marginTop: 24, textAlign: 'right' }}>
-            <Link to={claimsPath} style={{ color: '#2563eb', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
+          <div className="mt-6 text-right">
+            <Link to={claimsPath} className="text-[13px] font-semibold text-accent-blue no-underline">
               View all claims →
             </Link>
           </div>
         </div>
 
         {/* Recent Claims Table */}
-        <div className="portal-card" style={{ padding: '24px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
-            <h2 style={{ fontSize: 16, fontWeight: 700, color: '#111827', margin: 0 }}>Recent Claims</h2>
-            <Link to={claimsPath} style={{ color: '#2563eb', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
+        <div className="portal-card overflow-x-auto p-6">
+          <div className="mb-6 flex items-center justify-between">
+            <h2 className="m-0 text-base font-bold text-text-primary">Recent Claims</h2>
+            <Link to={claimsPath} className="text-[13px] font-semibold text-accent-blue no-underline">
               View all →
             </Link>
           </div>
 
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+          <table className="w-full border-collapse text-left">
             <thead>
               <tr>
-                <th style={{ paddingBottom: 16, borderBottom: '1px solid #f3f4f6', fontSize: 12, fontWeight: 600, color: '#6b7280' }}>Claim #</th>
-                <th style={{ paddingBottom: 16, borderBottom: '1px solid #f3f4f6', fontSize: 12, fontWeight: 600, color: '#6b7280' }}>Customer</th>
-                <th style={{ paddingBottom: 16, borderBottom: '1px solid #f3f4f6', fontSize: 12, fontWeight: 600, color: '#6b7280' }}>Status</th>
-                <th style={{ paddingBottom: 16, borderBottom: '1px solid #f3f4f6', fontSize: 12, fontWeight: 600, color: '#6b7280' }}>Date Submitted</th>
-                <th style={{ paddingBottom: 16, borderBottom: '1px solid #f3f4f6', fontSize: 12, fontWeight: 600, color: '#6b7280' }}>Amount</th>
+                <th className="border-b border-gray-100 pb-4 text-xs font-semibold text-gray-500">Claim #</th>
+                <th className="border-b border-gray-100 pb-4 text-xs font-semibold text-gray-500">Customer</th>
+                <th className="border-b border-gray-100 pb-4 text-xs font-semibold text-gray-500">Status</th>
+                <th className="border-b border-gray-100 pb-4 text-xs font-semibold text-gray-500">Date Submitted</th>
+                <th className="border-b border-gray-100 pb-4 text-xs font-semibold text-gray-500">Amount</th>
               </tr>
             </thead>
             <tbody>
               {!loading && dashboard.recentClaims.map((claim, idx) => {
                 const badge = getStatusBadge(claim.status);
+                const borderClass = idx !== dashboard.recentClaims.length - 1 ? 'border-b border-gray-100' : '';
                 return (
                   <tr key={idx}>
-                    <td style={{ padding: '16px 0', fontSize: 13, fontWeight: 600, color: '#111827', borderBottom: idx !== dashboard.recentClaims.length - 1 ? '1px solid #f3f4f6' : 'none' }}>
+                    <td className={`py-4 text-[13px] font-semibold text-text-primary ${borderClass}`}>
                       {claim.id}
                     </td>
-                    <td style={{ padding: '16px 0', fontSize: 13, color: '#4b5563', fontWeight: 500, borderBottom: idx !== dashboard.recentClaims.length - 1 ? '1px solid #f3f4f6' : 'none' }}>
+                    <td className={`py-4 text-[13px] font-medium text-text-secondary ${borderClass}`}>
                       {claim.customer}
                     </td>
-                    <td style={{ padding: '16px 0', borderBottom: idx !== dashboard.recentClaims.length - 1 ? '1px solid #f3f4f6' : 'none' }}>
-                      <span style={{ 
-                        background: badge.bg, color: badge.color, 
-                        padding: '4px 10px', borderRadius: 999, 
-                        fontSize: 11, fontWeight: 600 
-                      }}>
+                    <td className={`py-4 ${borderClass}`}>
+                      <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${badge.className}`}>
                         {badge.label ?? claim.status}
                       </span>
                     </td>
-                    <td style={{ padding: '16px 0', fontSize: 13, color: '#4b5563', fontWeight: 500, borderBottom: idx !== dashboard.recentClaims.length - 1 ? '1px solid #f3f4f6' : 'none' }}>
+                    <td className={`py-4 text-[13px] font-medium text-text-secondary ${borderClass}`}>
                       {formatDate(claim.date)}
                     </td>
-                    <td style={{ padding: '16px 0', fontSize: 13, fontWeight: 600, color: '#111827', borderBottom: idx !== dashboard.recentClaims.length - 1 ? '1px solid #f3f4f6' : 'none' }}>
+                    <td className={`py-4 text-[13px] font-semibold text-text-primary ${borderClass}`}>
                       {formatAmount(claim.amount)}
                     </td>
                   </tr>
                 );
               })}
               {loading && (
-                <tr><td colSpan={5} style={{ padding: '36px 0', color: '#6b7280', textAlign: 'center' }}>Loading recent claims...</td></tr>
+                <tr><td colSpan={5} className="py-9 text-center text-gray-500">Loading recent claims...</td></tr>
               )}
               {!loading && dashboard.recentClaims.length === 0 && (
-                <tr><td colSpan={5} style={{ padding: '36px 0', color: '#6b7280', textAlign: 'center' }}>No recent claims found.</td></tr>
+                <tr><td colSpan={5} className="py-9 text-center text-gray-500">No recent claims found.</td></tr>
               )}
             </tbody>
           </table>
@@ -310,16 +288,7 @@ export default function DashboardMetrics() {
       </div>
 
       {/* Daily Stats Widget — Dealer only */}
-      {!isAdminPortal && <DailyStatsWidget />}
-
-      <style>{`
-        /* Make sure the layout shifts to 1 column on small screens */
-        @media (max-width: 1024px) {
-          .animate-fade-in > div:nth-child(3) {
-            grid-template-columns: 1fr !important;
-          }
-        }
-      `}</style>
+      {/* {!isAdminPortal && <DailyStatsWidget />} */}
     </div>
   );
 }

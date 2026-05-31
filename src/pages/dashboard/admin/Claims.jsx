@@ -47,6 +47,7 @@ export default function Claims() {
   const filtered = useMemo(() => claims.filter((claim) => {
     const q = search.toLowerCase();
     const matchSearch = !q
+      || claim.claimId?.toLowerCase().includes(q)
       || claim._id?.toLowerCase().includes(q)
       || claim.name?.toLowerCase().includes(q)
       || claim.email?.toLowerCase().includes(q)
@@ -56,103 +57,85 @@ export default function Claims() {
   }), [claims, search, statusFilter]);
 
   return (
-    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+    <div className="flex flex-col gap-6 animate-fade-in">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.02em' }}>
+          <h1 className="m-0 text-[22px] font-extrabold text-text-primary">
             Claims Management
           </h1>
-          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4, margin: '4px 0 0' }}>
+          <p className="m-0 mt-1 text-[13px] text-text-muted">
             Review and manage all customer claims submitted through the website.
           </p>
         </div>
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 6,
-          background: 'rgba(37,99,235,0.08)',
-          border: '1px solid rgba(37,99,235,0.18)',
-          borderRadius: 8,
-          padding: '6px 14px',
-        }}>
-          <MessageSquare size={14} style={{ color: '#2563eb' }} />
-          <span style={{ fontSize: 13, fontWeight: 600, color: '#2563eb' }}>
+        <div className="flex items-center gap-1.5 rounded-lg border border-accent-blue/20 bg-accent-blue/10 px-3.5 py-1.5">
+          <MessageSquare size={14} className="text-accent-blue" />
+          <span className="text-[13px] font-semibold text-accent-blue">
             {claims.filter(c => c.status === 'pending').length} Open
           </span>
         </div>
       </div>
 
       {error && (
-        <div style={{ padding: '10px 14px', border: '1px solid rgba(220,38,38,0.18)', background: 'rgba(220,38,38,0.07)', color: '#dc2626', borderRadius: 8, fontSize: 13 }}>
+        <div className="rounded-lg border border-red-600/20 bg-red-600/10 px-3.5 py-2.5 text-[13px] text-red-600">
           {error}
         </div>
       )}
 
-      <div className="portal-card" style={{ overflow: 'hidden' }}>
-        <div style={{
-          padding: '14px 18px',
-          borderBottom: '1px solid #e9ecef',
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: 10,
-          alignItems: 'center',
-        }}>
-          <div style={{ position: 'relative', flex: '1 1 220px' }}>
-            <Search size={14} style={{
-              position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)',
-              color: 'var(--text-muted)', pointerEvents: 'none',
-            }} />
+      <div className="portal-card overflow-hidden">
+        <div className="flex flex-wrap items-center gap-2.5 border-b border-portal-border-sub px-[18px] py-3.5">
+          <div className="relative flex-[1_1_220px]">
+            <Search size={14} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted" />
             <input
               type="text"
               placeholder="Search by customer, email, order ID or claim ID..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="portal-input"
-              style={{ width: '100%', padding: '8px 12px 8px 32px', fontSize: 13 }}
+              className="portal-input w-full py-2 pl-8 pr-3 text-[13px]"
             />
           </div>
           <select
             value={statusFilter}
             onChange={e => setStatusFilter(e.target.value)}
-            className="portal-input"
-            style={{ padding: '8px 12px', fontSize: 13, cursor: 'pointer' }}
+            className="portal-input cursor-pointer px-3 py-2 text-[13px]"
           >
             <option value="all">All Statuses</option>
             <option value="pending">Pending</option>
             <option value="approved">Approved</option>
             <option value="denied">Denied</option>
           </select>
-          <button className="portal-btn-ghost" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', fontSize: 13 }}>
+          <button className="portal-btn-ghost flex items-center gap-1.5 px-3.5 py-2 text-[13px]">
             <Filter size={13} /> Filter
           </button>
         </div>
 
-        <div style={{ overflowX: 'auto' }}>
-          <table className="portal-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <div className="overflow-x-auto">
+          <table className="portal-table">
             <thead>
               <tr>
-                <th style={{ textAlign: 'left' }}>Claim ID</th>
-                <th style={{ textAlign: 'left' }}>Customer</th>
-                <th style={{ textAlign: 'left' }}>Order ID</th>
-                <th style={{ textAlign: 'left' }}>Flooring</th>
-                <th style={{ textAlign: 'left' }}>Status</th>
-                <th style={{ textAlign: 'left' }}>Date</th>
-                <th style={{ textAlign: 'right' }}>Actions</th>
+                <th>Claim ID</th>
+                <th>Customer</th>
+                <th>Order ID</th>
+                <th>Flooring</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th className="text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
               {loading && (
-                <tr><td colSpan={7} style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-muted)' }}>Loading claims...</td></tr>
+                <tr><td colSpan={7} className="px-5 py-10 text-center text-text-muted">Loading claims...</td></tr>
               )}
               {!loading && filtered.map((item) => (
                 <tr key={item._id}>
                   <td>
-                    <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontFamily: 'monospace', fontSize: 13 }}>
-                      {item._id}
+                    <span className="font-mono text-[13px] font-semibold text-text-primary">
+                      {item.claimId ?? item._id}
                     </span>
                   </td>
                   <td>
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <div className="flex flex-col">
                       <span>{item.name}</span>
-                      <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{item.email}</span>
+                      <span className="text-[11px] text-text-muted">{item.email}</span>
                     </div>
                   </td>
                   <td>{item.orderId}</td>
@@ -163,28 +146,15 @@ export default function Claims() {
                     </span>
                   </td>
                   <td>{formatDate(item.createdAt)}</td>
-                  <td style={{ textAlign: 'right' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 4 }}>
+                  <td className="text-right">
+                    <div className="flex items-center justify-end gap-1">
                       <button
                         onClick={() => navigate(`/dashboard/complaints/${item._id}`)}
-                        style={{
-                          background: 'rgba(37,99,235,0.07)',
-                          border: '1px solid rgba(37,99,235,0.18)',
-                          borderRadius: 7,
-                          padding: '6px 10px',
-                          color: '#2563eb',
-                          cursor: 'pointer',
-                          display: 'flex', alignItems: 'center', gap: 5,
-                          fontSize: 12, fontWeight: 500,
-                        }}
+                        className="flex cursor-pointer items-center gap-1.25 rounded-[7px] border border-accent-blue/20 bg-accent-blue/10 px-2.5 py-1.5 text-xs font-medium text-accent-blue"
                       >
                         <Eye size={13} /> View
                       </button>
-                      <button style={{
-                        background: 'transparent', border: 'none',
-                        color: 'var(--text-muted)', cursor: 'pointer', padding: '6px',
-                        borderRadius: 6,
-                      }}>
+                      <button className="cursor-pointer rounded-md border-0 bg-transparent p-1.5 text-text-muted">
                         <MoreVertical size={14} />
                       </button>
                     </div>
@@ -193,7 +163,7 @@ export default function Claims() {
               ))}
               {!loading && filtered.length === 0 && (
                 <tr>
-                  <td colSpan={7} style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-muted)' }}>
+                  <td colSpan={7} className="px-5 py-10 text-center text-text-muted">
                     No claims found matching your search.
                   </td>
                 </tr>

@@ -6,26 +6,25 @@ const defaultAnalytics = { totalContracts: 0, activeDealers: 0, avgContractsPerD
 
 const StatCard = ({ title, value, detail, icon: Icon, tone }) => {
   const tones = {
-    gold: ['rgba(232,160,32,0.12)', '#b7791f'],
-    blue: ['rgba(37,99,235,0.10)', '#2563eb'],
-    green: ['rgba(16,185,129,0.10)', '#059669'],
-    slate: ['rgba(100,116,139,0.12)', '#475569'],
+    gold: 'bg-accent-gold/15 text-yellow-700',
+    blue: 'bg-accent-blue/10 text-accent-blue',
+    green: 'bg-emerald-500/10 text-emerald-600',
+    slate: 'bg-slate-500/10 text-slate-600',
   };
-  const [bg, color] = tones[tone];
 
   return (
-    <div className="portal-card" style={{ padding: 18, minHeight: 118 }}>
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
+    <div className="portal-card min-h-[118px] p-[18px]">
+      <div className="flex items-start justify-between gap-3">
         <div>
-          <p style={{ margin: 0, fontSize: 12, color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+          <p className="m-0 text-xs font-bold uppercase tracking-[0.06em] text-text-muted">
             {title}
           </p>
-          <h3 style={{ margin: '9px 0 4px', fontSize: 28, lineHeight: 1, fontWeight: 800, color: 'var(--text-primary)' }}>
+          <h3 className="mb-1 mt-2.25 text-[28px] font-extrabold leading-none text-text-primary">
             {value}
           </h3>
-          <p style={{ margin: 0, fontSize: 12, color: 'var(--text-secondary)' }}>{detail}</p>
+          <p className="m-0 text-xs text-text-secondary">{detail}</p>
         </div>
-        <div style={{ width: 42, height: 42, borderRadius: 10, background: bg, color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <div className={`flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-[10px] ${tones[tone]}`}>
           <Icon size={20} />
         </div>
       </div>
@@ -60,52 +59,52 @@ export default function SalesAnalytics() {
   }, []);
 
   return (
-    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 14 }}>
+    <div className="flex flex-col gap-5.5 animate-fade-in">
+      <div className="flex flex-wrap items-center justify-between gap-3.5">
         <div>
-          <h1 style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.02em' }}>
+          <h1 className="m-0 text-2xl font-extrabold text-text-primary">
             Sales Analytics
           </h1>
-          <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '5px 0 0' }}>
+          <p className="m-0 mt-1.25 text-[13px] text-text-muted">
             Aggregated performance across dealer contracts and claims.
           </p>
         </div>
-        <button className="portal-btn-ghost" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 14px', fontSize: 13 }}>
+        <button className="portal-btn-ghost flex items-center gap-2 px-3.5 py-2.25 text-[13px]">
           <CalendarDays size={14} />
           Jan 1 - Jun 30
         </button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 14 }}>
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(210px,1fr))] gap-3.5">
         <StatCard title="Total Contracts" value={loading ? '...' : analyticsData.totalContracts.toLocaleString()} detail="All contract records" icon={ShoppingBag} tone="slate" />
         <StatCard title="Active Dealers" value={loading ? '...' : analyticsData.activeDealers} detail={`${analyticsData.avgContractsPerDealer} avg contracts`} icon={Users} tone="blue" />
       </div>
 
-      {error && <div style={{ padding: '10px 14px', border: '1px solid rgba(220,38,38,0.18)', background: 'rgba(220,38,38,0.07)', color: '#dc2626', borderRadius: 8, fontSize: 13 }}>{error}</div>}
+      {error && <div className="rounded-lg border border-red-600/20 bg-red-600/10 px-3.5 py-2.5 text-[13px] text-red-600">{error}</div>}
 
-      <div className="portal-card" style={{ padding: 20 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14, marginBottom: 18 }}>
+      <div className="portal-card p-5">
+        <div className="mb-[18px] flex items-center justify-between gap-3.5">
           <div>
-            <h2 style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>Monthly Contract Volume</h2>
-            <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '4px 0 0' }}>Total contracts compared with claims.</p>
+            <h2 className="m-0 text-base font-extrabold text-text-primary">Monthly Contract Volume</h2>
+            <p className="m-0 mt-1 text-xs text-text-muted">Total contracts compared with claims.</p>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text-secondary)', fontWeight: 600 }}>
-              <span style={{ width: 9, height: 9, borderRadius: 99, background: '#111827' }} /> Total Contracts
+          <div className="flex flex-wrap items-center gap-3.5">
+            <span className="flex items-center gap-1.5 text-xs font-semibold text-text-secondary">
+              <span className="h-[9px] w-[9px] rounded-full bg-text-primary" /> Total Contracts
             </span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text-secondary)', fontWeight: 600 }}>
-              <span style={{ width: 9, height: 9, borderRadius: 99, background: '#e8a020' }} /> Claims
+            <span className="flex items-center gap-1.5 text-xs font-semibold text-text-secondary">
+              <span className="h-[9px] w-[9px] rounded-full bg-accent-gold" /> Claims
             </span>
           </div>
         </div>
 
-        <div style={{ height: 318, display: 'grid', gridTemplateColumns: '40px 1fr', gap: 12 }}>
-          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', color: 'var(--text-muted)', fontSize: 11, paddingBottom: 28 }}>
+        <div className="grid h-[318px] grid-cols-[40px_1fr] gap-3">
+          <div className="flex flex-col justify-between pb-7 text-[11px] text-text-muted">
             <span>{maxVal}</span>
             <span>{Math.round(maxVal / 2)}</span>
             <span>0</span>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: `repeat(${analyticsData.chartData.length}, minmax(42px, 1fr))`, alignItems: 'end', gap: 14, borderLeft: '1px solid #eef2f7', borderBottom: '1px solid #eef2f7', padding: '8px 6px 0' }}>
+          <div className="grid items-end gap-3.5 border-b border-l border-slate-100 px-1.5 pt-2" style={{ gridTemplateColumns: `repeat(${analyticsData.chartData.length}, minmax(42px, 1fr))` }}>
             {analyticsData.chartData.map((data, index) => {
               const contractHeight = Math.max((data.contracts / maxVal) * 100, 4);
               const claimsHeight = Math.max((data.claims / maxVal) * 100, 4);
@@ -115,20 +114,20 @@ export default function SalesAnalytics() {
                   key={data.month}
                   onMouseEnter={() => setHoveredIndex(index)}
                   onMouseLeave={() => setHoveredIndex(null)}
-                  style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'center', gap: 8, position: 'relative', minWidth: 42 }}
+                  className="relative flex h-full min-w-[42px] flex-col items-center justify-end gap-2"
                 >
                   {hoveredIndex === index && (
-                    <div style={{ position: 'absolute', top: -4, transform: 'translateY(-100%)', background: '#111827', color: '#fff', borderRadius: 8, padding: '8px 10px', fontSize: 11, boxShadow: '0 10px 24px rgba(15,23,42,0.22)', whiteSpace: 'nowrap', zIndex: 2 }}>
-                      <div style={{ fontWeight: 800, marginBottom: 3 }}>{data.month}</div>
+                    <div className="absolute -top-1 z-2 -translate-y-full whitespace-nowrap rounded-lg bg-text-primary px-2.5 py-2 text-[11px] text-white shadow-[0_10px_24px_rgba(15,23,42,0.22)]">
+                      <div className="mb-0.75 font-extrabold">{data.month}</div>
                       <div>Total Contracts: {data.contracts}</div>
                       <div>Claims: {data.claims}</div>
                     </div>
                   )}
-                  <div style={{ height: 250, width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'flex-end', gap: 5 }}>
-                    <div style={{ height: `${contractHeight}%`, width: 16, borderRadius: '5px 5px 0 0', background: '#111827' }} />
-                    <div style={{ height: `${claimsHeight}%`, width: 16, borderRadius: '5px 5px 0 0', background: 'linear-gradient(180deg, #f5bc50, #e8a020)' }} />
+                  <div className="flex h-[250px] w-full items-end justify-center gap-1.25">
+                    <div className="w-4 rounded-t-[5px] bg-text-primary" style={{ height: `${contractHeight}%` }} />
+                    <div className="w-4 rounded-t-[5px] bg-[linear-gradient(180deg,#f5bc50,#e8a020)]" style={{ height: `${claimsHeight}%` }} />
                   </div>
-                  <span style={{ height: 20, fontSize: 12, color: 'var(--text-muted)', fontWeight: 600 }}>{data.month}</span>
+                  <span className="h-5 text-xs font-semibold text-text-muted">{data.month}</span>
                 </div>
               );
             })}

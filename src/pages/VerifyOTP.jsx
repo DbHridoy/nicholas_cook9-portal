@@ -11,8 +11,27 @@ export default function VerifyOTP() {
   const inputRefs = useRef([]);
   const email = sessionStorage.getItem('passwordResetEmail') ?? '';
 
+  const fillOtpFromText = (text, startIndex = 0) => {
+    const digits = text.replace(/\D/g, '').slice(0, otp.length - startIndex);
+    if (!digits) return;
+
+    const nextOtp = [...otp];
+    digits.split('').forEach((digit, offset) => {
+      nextOtp[startIndex + offset] = digit;
+    });
+
+    setOtp(nextOtp);
+    const nextFocusIndex = Math.min(startIndex + digits.length, otp.length - 1);
+    inputRefs.current[nextFocusIndex]?.focus();
+  };
+
   const handleChange = (element, index) => {
-    if (isNaN(element.value)) return false;
+    if (element.value.length > 1) {
+      fillOtpFromText(element.value, index);
+      return;
+    }
+
+    if (isNaN(element.value)) return;
 
     setOtp([...otp.map((d, idx) => (idx === index ? element.value : d))]);
 
@@ -20,6 +39,11 @@ export default function VerifyOTP() {
     if (element.nextSibling) {
       element.nextSibling.focus();
     }
+  };
+
+  const handlePaste = (e, index) => {
+    e.preventDefault();
+    fillOtpFromText(e.clipboardData.getData('text'), index);
   };
 
   const navigate = useNavigate();
@@ -68,6 +92,7 @@ export default function VerifyOTP() {
                     key={index}
                     value={data}
                     onChange={e => handleChange(e.target, index)}
+                    onPaste={e => handlePaste(e, index)}
                     onFocus={e => e.target.select()}
                     ref={el => inputRefs.current[index] = el}
                   />

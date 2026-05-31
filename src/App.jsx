@@ -13,6 +13,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 // Dealer pages
 import DashboardMetrics from './pages/dashboard/DashboardMetrics';
+import Notifications from './pages/dashboard/Notifications';
 import Sales from './pages/dashboard/Sales';
 import SalesDetails from './pages/dashboard/SalesDetails';
 import Reports from './pages/dashboard/Reports';
@@ -26,6 +27,10 @@ import SalesAnalytics from './pages/dashboard/admin/SalesAnalytics';
 import DealerDetails from './pages/dashboard/admin/DealerDetails';
 import Claims from './pages/dashboard/admin/Claims';
 import AdminClaimDetails from './pages/dashboard/admin/AdminClaimDetails';
+
+// Profile pages
+import Profile from './pages/dashboard/Profile';
+import ChangePassword from './pages/dashboard/ChangePassword';
 
 const router = createBrowserRouter([
   { path: '/', element: <Login /> },
@@ -41,6 +46,18 @@ const router = createBrowserRouter([
       {
         path: '',
         element: <DashboardMetrics />,
+      },
+      {
+        path: 'profile',
+        element: <Profile />,
+      },
+      {
+        path: 'profile/change-password',
+        element: <ChangePassword />,
+      },
+      {
+        path: 'notifications',
+        element: <Notifications />,
       },
       {
         path: 'sales',

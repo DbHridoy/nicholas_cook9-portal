@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:5200/api/v1';
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '/api/v1').replace(/\/$/, '');
 
 const TOKEN_KEY = 'nicholas_cook9_portal_tokens';
 
@@ -22,7 +22,7 @@ export function clearSession() {
   localStorage.removeItem(TOKEN_KEY);
 }
 
-async function request(path, options = {}) {
+async function request(path, options = {}, retryOnUnauthorized = true) {
   const session = getStoredSession();
   const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
   const headers = {
@@ -38,6 +38,20 @@ async function request(path, options = {}) {
   const body = await response.json().catch(() => null);
 
   if (!response.ok || body?.success === false) {
+    if (response.status === 401 && retryOnUnauthorized && session?.refreshToken && path !== '/auth/refresh') {
+      try {
+        const refreshBody = await request('/auth/refresh', {
+          method: 'POST',
+          body: JSON.stringify({ refreshToken: session.refreshToken }),
+        }, false);
+
+        storeSession(refreshBody.data);
+        return request(path, options, false);
+      } catch {
+        clearSession();
+      }
+    }
+
     throw new Error(body?.message || 'Request failed');
   }
 
@@ -62,6 +76,18 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ refreshToken: session.refreshToken }),
     });
+  },
+
+  async refreshToken() {
+    const session = getStoredSession();
+    if (!session?.refreshToken) throw new Error('Refresh token is missing');
+
+    const body = await request('/auth/refresh', {
+      method: 'POST',
+      body: JSON.stringify({ refreshToken: session.refreshToken }),
+    }, false);
+    storeSession(body.data);
+    return body.data;
   },
 
   forgotPassword(email) {
@@ -89,6 +115,24 @@ export const api = {
     return request('/users').then((body) => body.data.users);
   },
 
+  getMyProfile() {
+    return request('/users/me').then((body) => body.data.user);
+  },
+
+  updateMyProfile(payload) {
+    return request('/users/me', {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    }).then((body) => body.data.user);
+  },
+
+  changeMyPassword(payload) {
+    return request('/users/me/password', {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    });
+  },
+
   getUser(id) {
     return request(`/users/${id}`).then((body) => body.data.user);
   },
@@ -104,6 +148,13 @@ export const api = {
     return request('/users', {
       method: 'POST',
       body: JSON.stringify(payload),
+    }).then((body) => body.data.user);
+  },
+
+  updateUserStatus(id, status) {
+    return request(`/users/${id}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status }),
     }).then((body) => body.data.user);
   },
 
@@ -123,6 +174,13 @@ export const api = {
     return request('/claims').then((body) => body.data.claims);
   },
 
+  createClaim(payload) {
+    return request('/claims', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }).then((body) => body.data.claim);
+  },
+
   getClaim(id) {
     return request(`/claims/${id}`).then((body) => body.data.claim);
   },
@@ -139,9 +197,11 @@ export const api = {
   },
 
   createContract(payload) {
+    const isFormData = typeof FormData !== 'undefined' && payload instanceof FormData;
+
     return request('/contracts', {
       method: 'POST',
-      body: JSON.stringify(payload),
+      body: isFormData ? payload : JSON.stringify(payload),
     }).then((body) => body.data.contract);
   },
 

@@ -56,7 +56,7 @@ export default function Login() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="block w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2563eb] focus:border-transparent text-sm outline-none"
+                  className="portal-input block w-full py-2.5 pl-10 pr-3 text-sm"
                   placeholder="name@enterprise.com"
                 />
               </div>
@@ -80,7 +80,7 @@ export default function Login() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="block w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2563eb] focus:border-transparent text-sm outline-none"
+                  className="portal-input block w-full py-2.5 pl-10 pr-3 text-sm"
                   placeholder="••••••••"
                 />
               </div>
@@ -89,8 +89,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white transition-all"
-              style={{ background: 'linear-gradient(135deg, #e8a020, #f5bc50)', boxShadow: '0 2px 10px rgba(232,160,32,0.35)' }}
+              className="portal-btn-primary flex w-full items-center justify-center px-4 py-3 text-sm"
             >
               {isSubmitting ? 'Signing In...' : 'Sign In'}
               <ArrowRight className="ml-2 h-4 w-4" />

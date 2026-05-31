@@ -4,12 +4,12 @@ export default function Logo({ subtitle = 'Protection Claims Portal', showIcon =
   return (
     <div className="flex flex-col items-center mb-8">
       {showIcon && (
-        <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-3" style={{ background: 'var(--gradient-accent)', boxShadow: '0 10px 24px rgba(232,160,32,0.28)' }}>
+        <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-lg bg-[linear-gradient(135deg,#e8a020_0%,#f5bc50_100%)] shadow-[0_10px_24px_rgba(232,160,32,0.28)]">
           <ShieldCheck className="text-white" size={24} />
         </div>
       )}
-      <h1 className="text-2xl font-bold text-[#111827]">Nicholas Cook</h1>
-      <p className="text-sm text-gray-500 mt-1 uppercase tracking-wide">{subtitle}</p>
+      <h1 className="text-2xl font-bold text-text-primary">Nicholas Cook</h1>
+      <p className="mt-1 text-sm uppercase tracking-wide text-gray-500">{subtitle}</p>
     </div>
   );
 }

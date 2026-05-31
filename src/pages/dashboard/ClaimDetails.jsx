@@ -57,7 +57,7 @@ export default function ClaimDetails() {
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-[#111827]">Claim {claim._id}</h1>
+          <h1 className="text-2xl font-bold text-[#111827]">Claim {claim.claimId ?? claim._id}</h1>
           <p className="text-sm text-gray-500 mt-1">Submitted on {formatDate(claim.createdAt)}</p>
         </div>
         <div className="ml-auto flex items-center gap-3">

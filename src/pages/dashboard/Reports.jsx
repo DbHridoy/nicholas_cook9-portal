@@ -45,6 +45,7 @@ export default function Reports() {
   const filtered = useMemo(() => claims.filter((claim) => {
     const q = search.toLowerCase();
     return !q
+      || claim.claimId?.toLowerCase().includes(q)
       || claim._id?.toLowerCase().includes(q)
       || claim.name?.toLowerCase().includes(q)
       || claim.email?.toLowerCase().includes(q)
@@ -94,7 +95,7 @@ export default function Reports() {
               )}
               {!loading && filtered.map((claim) => (
                 <tr key={claim._id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-[#111827]">{claim._id}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-[#111827]">{claim.claimId ?? claim._id}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{claim.name}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{claim.orderId}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{claim.flooringType}</td>
