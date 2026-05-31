@@ -2,27 +2,47 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, ArrowRight, ArrowLeft } from 'lucide-react';
 import Logo from '../components/Logo';
+import { api } from '../lib/api';
 
 export default function ForgotPassword() {
   const navigate = useNavigate();
+  const [email, setEmail] = React.useState('');
+  const [message, setMessage] = React.useState('');
+  const [error, setError] = React.useState('');
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
   
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    navigate('/verify-otp');
+    setError('');
+    setMessage('');
+    setIsSubmitting(true);
+
+    try {
+      await api.forgotPassword(email);
+      sessionStorage.setItem('passwordResetEmail', email);
+      setMessage('If the account exists, a reset code was sent.');
+      navigate('/verify-otp');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to request password reset.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#F8F9FA] px-4">
+    <div className="auth-shell">
       <div className="w-full max-w-md">
-        <Logo subtitle="Enterprise Management Systems" />
+        <Logo subtitle="Password Recovery" />
         
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
+        <div className="auth-card">
           <h2 className="text-2xl font-bold text-[#111827] mb-2">Forgot Password</h2>
           <p className="text-sm text-gray-500 mb-6">
             Enter your email address and we'll send you a code to reset your password.
           </p>
           
           <form className="space-y-6" onSubmit={handleSubmit}>
+            {error && <div className="p-3 bg-red-50 border border-red-100 text-red-600 text-xs font-medium rounded-lg">{error}</div>}
+            {message && <div className="p-3 bg-green-50 border border-green-100 text-green-700 text-xs font-medium rounded-lg">{message}</div>}
             <div>
               <label className="block text-xs font-medium text-gray-600 mb-2 uppercase tracking-wider">
                 Email Address
@@ -33,6 +53,8 @@ export default function ForgotPassword() {
                 </div>
                 <input
                   type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="block w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#111827] focus:border-transparent text-sm"
                   placeholder="john.doe@enterprise.com"
                   required
@@ -42,9 +64,10 @@ export default function ForgotPassword() {
 
             <button
               type="submit"
-              className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-[#111827] hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#111827] transition-colors"
+              disabled={isSubmitting}
+              className="portal-btn-primary w-full flex justify-center items-center py-3 px-4 text-sm"
             >
-              Send Reset Code
+              {isSubmitting ? 'Sending...' : 'Send Reset Code'}
               <ArrowRight className="ml-2 h-4 w-4" />
             </button>
             

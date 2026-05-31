@@ -1,4 +1,3 @@
-import React from 'react';
 import { FileText, CheckCircle2, DollarSign, Calendar } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';

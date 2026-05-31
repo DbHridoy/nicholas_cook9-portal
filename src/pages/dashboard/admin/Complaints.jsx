@@ -1,6 +1,5 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Filter, Eye, MoreVertical, MessageSquare } from 'lucide-react';
+import { Search, Filter, Eye, MoreVertical } from 'lucide-react';
 
 const complaints = [
   { id: 'CLM-8091', customer: 'Acme Corp', dealer: 'Main Street Motors', status: 'Resolved', date: '2026-05-01' },

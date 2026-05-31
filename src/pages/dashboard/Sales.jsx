@@ -1,18 +1,29 @@
 import React, { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { FileText, Upload, Search, Eye, Plus, X, CheckCircle2, AlertCircle, DollarSign, User, Hash } from 'lucide-react';
+import { api } from '../../lib/api';
 
-const initialContracts = [
-  { id: 'CON-1001', customer: 'John Doe', amount: '$1,299.00', status: 'Active', source: 'uploaded' },
-  { id: 'CON-1002', customer: 'Jane Smith', amount: '$899.00', status: 'Pending', source: 'manual' },
-  { id: 'CON-1003', customer: 'Bob Johnson', amount: '$2,499.00', status: 'Active', source: 'uploaded' },
-  { id: 'CON-1004', customer: 'Alice Williams', amount: '$1,850.00', status: 'Active', source: 'uploaded' },
-];
+const formatMoney = (value) => `$${Number(value || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
 
-const emptyForm = { id: '', customer: '', amount: '' };
+const toContractRow = (contract) => ({
+  id: contract._id,
+  customer: contract.name,
+  amount: formatMoney(contract.price),
+  status: 'Active',
+  source: contract.file?.startsWith('manual/') ? 'manual' : 'uploaded',
+});
+
+const emptyForm = {
+  customer: '',
+  amount: '',
+  propertyAddress: '',
+  installationDate: '',
+  coveredProduct: 'carpet',
+  term: '3_year_coverage',
+};
 
 export default function Contracts() {
-  const [contracts, setContracts] = useState(initialContracts);
+  const [contracts, setContracts] = useState([]);
   const [search, setSearch] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
@@ -20,7 +31,25 @@ export default function Contracts() {
   const [uploadedFile, setUploadedFile] = useState(null);
   const [dragOver, setDragOver] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
+  const [loading, setLoading] = useState(true);
   const fileInputRef = useRef();
+
+  React.useEffect(() => {
+    let active = true;
+
+    api.listContracts()
+      .then((data) => {
+        if (active) setContracts(data.map(toContractRow));
+      })
+      .catch((err) => setFormError(err instanceof Error ? err.message : 'Unable to load contracts.'))
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const filtered = contracts.filter(c => {
     const q = search.toLowerCase();
@@ -40,21 +69,30 @@ export default function Contracts() {
     }
   };
 
-  const handleManualSubmit = () => {
-    if (!form.id.trim() || !form.customer.trim() || !form.amount.trim()) {
+  const handleManualSubmit = async () => {
+    if (!form.customer.trim() || !form.amount.trim() || !form.propertyAddress.trim() || !form.installationDate) {
       setFormError('All fields are required.');
       return;
     }
-    if (contracts.find(c => c.id === form.id.trim())) {
-      setFormError('Contract ID already exists.');
-      return;
+
+    try {
+      const created = await api.createContract({
+        name: form.customer.trim(),
+        propertyAddress: form.propertyAddress.trim(),
+        installationDate: form.installationDate,
+        coveredProduct: form.coveredProduct,
+        term: form.term,
+        price: Number(form.amount),
+        file: `manual/${form.customer.trim().replace(/\s+/g, '-').toLowerCase()}`,
+      });
+      setContracts(prev => [toContractRow(created), ...prev]);
+      setForm(emptyForm);
+      setShowForm(false);
+      setFormError('');
+      showSuccess('Contract added manually.');
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : 'Unable to create contract.');
     }
-    const amt = form.amount.trim().startsWith('$') ? form.amount.trim() : `$${parseFloat(form.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
-    setContracts(prev => [{ id: form.id.trim(), customer: form.customer.trim(), amount: amt, status: 'Pending', source: 'manual' }, ...prev]);
-    setForm(emptyForm);
-    setShowForm(false);
-    setFormError('');
-    showSuccess('Contract added manually.');
   };
 
   const showSuccess = (msg) => {
@@ -157,13 +195,13 @@ export default function Contracts() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 14, marginBottom: 16 }}>
             <div>
               <label style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 7 }}>
-                <Hash size={10} /> Contract ID
+                <Hash size={10} /> Property Address
               </label>
               <input
                 type="text"
-                placeholder="e.g. CON-2001"
-                value={form.id}
-                onChange={e => setForm(p => ({ ...p, id: e.target.value }))}
+                placeholder="e.g. 123 Main Street"
+                value={form.propertyAddress}
+                onChange={e => setForm(p => ({ ...p, propertyAddress: e.target.value }))}
                 className="portal-input"
                 style={{ width: '100%', padding: '9px 12px', fontSize: 13 }}
               />
@@ -193,6 +231,48 @@ export default function Contracts() {
                 className="portal-input"
                 style={{ width: '100%', padding: '9px 12px', fontSize: 13 }}
               />
+            </div>
+            <div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 7 }}>
+                Installation Date
+              </label>
+              <input
+                type="date"
+                value={form.installationDate}
+                onChange={e => setForm(p => ({ ...p, installationDate: e.target.value }))}
+                className="portal-input"
+                style={{ width: '100%', padding: '9px 12px', fontSize: 13 }}
+              />
+            </div>
+            <div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 7 }}>
+                Covered Product
+              </label>
+              <select
+                value={form.coveredProduct}
+                onChange={e => setForm(p => ({ ...p, coveredProduct: e.target.value }))}
+                className="portal-input"
+                style={{ width: '100%', padding: '9px 12px', fontSize: 13 }}
+              >
+                <option value="carpet">Carpet</option>
+                <option value="lvp_laminate">LVP / Laminate</option>
+                <option value="hardwood">Hardwood</option>
+                <option value="tile">Tile</option>
+              </select>
+            </div>
+            <div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 7 }}>
+                Term
+              </label>
+              <select
+                value={form.term}
+                onChange={e => setForm(p => ({ ...p, term: e.target.value }))}
+                className="portal-input"
+                style={{ width: '100%', padding: '9px 12px', fontSize: 13 }}
+              >
+                <option value="3_year_coverage">3 Year Coverage</option>
+                <option value="5_year_coverage">5 Year Coverage</option>
+              </select>
             </div>
           </div>
 
@@ -239,7 +319,10 @@ export default function Contracts() {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((contract) => (
+              {loading && (
+                <tr><td colSpan={6} style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-muted)' }}>Loading contracts...</td></tr>
+              )}
+              {!loading && filtered.map((contract) => (
                 <tr key={contract.id}>
                   <td>
                     <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontFamily: 'monospace', fontSize: 13 }}>
@@ -261,7 +344,7 @@ export default function Contracts() {
                   </td>
                 </tr>
               ))}
-              {filtered.length === 0 && (
+              {!loading && filtered.length === 0 && (
                 <tr><td colSpan={6} style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-muted)' }}>No contracts found.</td></tr>
               )}
             </tbody>

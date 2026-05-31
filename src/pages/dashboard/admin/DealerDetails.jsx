@@ -1,4 +1,3 @@
-import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, ShoppingCart, CheckCircle, Clock, AlertTriangle, Mail, Phone, MapPin } from 'lucide-react';
 

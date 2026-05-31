@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Users, FileCheck, DollarSign, TrendingUp, BarChart2, Save, CalendarDays, CheckCircle2 } from 'lucide-react';
 
 const defaultForm = {

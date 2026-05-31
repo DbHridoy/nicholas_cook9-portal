@@ -1,4 +1,3 @@
-import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, User, Package, MessageSquare, Clock } from 'lucide-react';
 

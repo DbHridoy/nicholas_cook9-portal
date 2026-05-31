@@ -1,0 +1,134 @@
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:5200/api/v1';
+
+const TOKEN_KEY = 'nicholas_cook9_portal_tokens';
+
+export function getStoredSession() {
+  const raw = localStorage.getItem(TOKEN_KEY);
+  if (!raw) return null;
+
+  try {
+    return JSON.parse(raw);
+  } catch {
+    localStorage.removeItem(TOKEN_KEY);
+    return null;
+  }
+}
+
+export function storeSession(session) {
+  localStorage.setItem(TOKEN_KEY, JSON.stringify(session));
+}
+
+export function clearSession() {
+  localStorage.removeItem(TOKEN_KEY);
+}
+
+async function request(path, options = {}) {
+  const session = getStoredSession();
+  const headers = {
+    ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+    ...(session?.accessToken ? { Authorization: `Bearer ${session.accessToken}` } : {}),
+    ...options.headers,
+  };
+
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    ...options,
+    headers,
+  });
+  const body = await response.json().catch(() => null);
+
+  if (!response.ok || body?.success === false) {
+    throw new Error(body?.message || 'Request failed');
+  }
+
+  return body;
+}
+
+export const api = {
+  async login(credentials) {
+    const body = await request('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify(credentials),
+    });
+    storeSession(body.data);
+    return body.data;
+  },
+
+  async logout() {
+    const session = getStoredSession();
+    if (!session?.refreshToken) return;
+
+    await request('/auth/logout', {
+      method: 'POST',
+      body: JSON.stringify({ refreshToken: session.refreshToken }),
+    });
+  },
+
+  forgotPassword(email) {
+    return request('/auth/password/forgot', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+  },
+
+  verifyOtp(email, otp) {
+    return request('/auth/password/verify-otp', {
+      method: 'POST',
+      body: JSON.stringify({ email, otp }),
+    });
+  },
+
+  resetPassword(email, resetToken, password) {
+    return request('/auth/password/reset', {
+      method: 'POST',
+      body: JSON.stringify({ email, resetToken, password }),
+    });
+  },
+
+  listUsers() {
+    return request('/users').then((body) => body.data.users);
+  },
+
+  createDealer(payload) {
+    return request('/users/dealers', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }).then((body) => body.data.user);
+  },
+
+  createUser(payload) {
+    return request('/users', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }).then((body) => body.data.user);
+  },
+
+  listClaims() {
+    return request('/claims').then((body) => body.data.claims);
+  },
+
+  getClaim(id) {
+    return request(`/claims/${id}`).then((body) => body.data.claim);
+  },
+
+  updateClaimStatus(id, status) {
+    return request(`/claims/${id}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status }),
+    }).then((body) => body.data.claim);
+  },
+
+  listContracts() {
+    return request('/contracts').then((body) => body.data.contracts);
+  },
+
+  createContract(payload) {
+    return request('/contracts', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }).then((body) => body.data.contract);
+  },
+
+  getContract(id) {
+    return request(`/contracts/${id}`).then((body) => body.data.contract);
+  },
+};

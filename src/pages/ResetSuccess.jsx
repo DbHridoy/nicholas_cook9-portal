@@ -1,15 +1,14 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import { CheckCircle2 } from 'lucide-react';
 import Logo from '../components/Logo';
 
 export default function ResetSuccess() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#F8F9FA] px-4">
+    <div className="auth-shell">
       <div className="w-full max-w-md">
-        <Logo subtitle="ENTERPRISE MANAGEMENT" showIcon={false} />
+        <Logo subtitle="Password Updated" />
         
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center">
+        <div className="auth-card text-center">
           <div className="mx-auto w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mb-6">
             <CheckCircle2 className="h-8 w-8 text-[#4F6288]" />
           </div>
@@ -21,7 +20,7 @@ export default function ResetSuccess() {
           
           <Link
             to="/"
-            className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-[#111827] hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#111827] transition-colors"
+            className="portal-btn-primary w-full flex justify-center items-center py-3 px-4 text-sm"
           >
             Sign In
           </Link>

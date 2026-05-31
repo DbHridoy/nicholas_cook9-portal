@@ -1,4 +1,3 @@
-import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
@@ -19,7 +18,9 @@ export default function ProtectedRoute({ role, children }) {
     return <Navigate to="/" replace />;
   }
 
-  if (role && userRole !== role) {
+  const normalizedRole = userRole === 'super_admin' ? 'admin' : userRole;
+
+  if (role && normalizedRole !== role) {
     return <Navigate to="/dashboard" replace />;
   }
 

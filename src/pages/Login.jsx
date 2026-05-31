@@ -5,6 +5,7 @@ import Logo from '../components/Logo';
 
 import { useDispatch } from 'react-redux';
 import { login } from '../store/authSlice';
+import { api } from '../lib/api';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -12,28 +13,30 @@ export default function Login() {
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [error, setError] = React.useState('');
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
+    setIsSubmitting(true);
 
-    if (email === 'admin@gmail.com' && password === '123456') {
-      dispatch(login({ user: email, role: 'admin' }));
+    try {
+      const session = await api.login({ email, password });
+      dispatch(login({ user: session.user }));
       navigate('/dashboard');
-    } else if (email === 'dealer@gmail.com' && password === '123456') {
-      dispatch(login({ user: email, role: 'dealer' }));
-      navigate('/dashboard');
-    } else {
-      setError('Invalid email or password');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Invalid email or password');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#F8F9FA] px-4">
+    <div className="auth-shell">
       <div className="w-full max-w-md">
-        <Logo subtitle="Enterprise Asset Management System" />
+        <Logo subtitle="Portal Access" />
         
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
+        <div className="auth-card">
           <form className="space-y-6" onSubmit={handleLogin}>
             {error && (
               <div className="p-3 bg-red-50 border border-red-100 text-red-600 text-xs font-medium rounded-lg">
@@ -52,6 +55,7 @@ export default function Login() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  required
                   className="block w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2563eb] focus:border-transparent text-sm outline-none"
                   placeholder="name@enterprise.com"
                 />
@@ -75,6 +79,7 @@ export default function Login() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  required
                   className="block w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2563eb] focus:border-transparent text-sm outline-none"
                   placeholder="••••••••"
                 />
@@ -83,10 +88,11 @@ export default function Login() {
 
             <button
               type="submit"
+              disabled={isSubmitting}
               className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white transition-all"
               style={{ background: 'linear-gradient(135deg, #e8a020, #f5bc50)', boxShadow: '0 2px 10px rgba(232,160,32,0.35)' }}
             >
-              Sign In
+              {isSubmitting ? 'Signing In...' : 'Sign In'}
               <ArrowRight className="ml-2 h-4 w-4" />
             </button>
           </form>

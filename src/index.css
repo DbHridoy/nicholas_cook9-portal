@@ -1,11 +1,11 @@
-@import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import "tailwindcss";
 
 @theme {
   --font-sans: "Inter", "Roboto", "Helvetica Neue", "Arial Nova", "Nimbus Sans", Arial, sans-serif;
 }
 
-/* ─── Ledger-Group Light Design Tokens ───────────────────────── */
+/* ─── Nicholas Cook Portal Design Tokens ─────────────────────── */
 :root {
   /* Backgrounds */
   --portal-bg:         #f0f2f5;
@@ -47,10 +47,27 @@
 }
 
 body {
+  margin: 0;
+  min-width: 320px;
   background-color: var(--portal-bg);
   color: var(--text-primary);
   font-family: 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+button:disabled {
+  cursor: not-allowed;
 }
 
 /* ─── Scrollbar ──────────────────────────────────────────────── */
@@ -63,8 +80,8 @@ body {
 .portal-card {
   background: var(--portal-card);
   border: 1px solid var(--portal-border);
-  border-radius: 14px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
 }
 
 .portal-input {
@@ -82,6 +99,12 @@ body {
 }
 .portal-input::placeholder { color: var(--text-muted); }
 
+.portal-input,
+.portal-btn-primary,
+.portal-btn-ghost {
+  min-height: 38px;
+}
+
 .portal-btn-primary {
   background: var(--gradient-accent);
   color: #fff;
@@ -97,6 +120,12 @@ body {
   transform: translateY(-1px);
   box-shadow: 0 6px 20px rgba(232,160,32,0.35);
 }
+.portal-btn-primary:disabled,
+.portal-btn-ghost:disabled {
+  opacity: 0.6;
+  transform: none;
+  box-shadow: none;
+}
 
 .portal-btn-ghost {
   background: #ffffff;
@@ -111,6 +140,112 @@ body {
   background: #f9fafb;
   color: var(--text-primary);
   border-color: #9ca3af;
+}
+
+.portal-page {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.portal-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.portal-page-title {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 24px;
+  line-height: 1.2;
+  font-weight: 800;
+}
+
+.portal-page-subtitle {
+  margin: 4px 0 0;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.portal-muted-link {
+  color: var(--accent-blue);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.portal-muted-link:hover {
+  color: #1d4ed8;
+}
+
+/* Normalize older Tailwind-built screens to the portal visual system. */
+.bg-white.shadow-sm.border {
+  background: var(--portal-card) !important;
+  border-color: var(--portal-border) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06) !important;
+}
+
+.rounded-xl,
+.rounded-2xl {
+  border-radius: 8px !important;
+}
+
+.text-\[\#111827\] {
+  color: var(--text-primary) !important;
+}
+
+.bg-\[\#111827\] {
+  background: var(--gradient-accent) !important;
+}
+
+.hover\:bg-gray-800:hover {
+  background: #d88f16 !important;
+}
+
+.focus\:ring-\[\#111827\]:focus {
+  --tw-ring-color: var(--accent-blue) !important;
+}
+
+.focus\:border-\[\#111827\]:focus {
+  border-color: var(--accent-blue) !important;
+}
+
+.min-w-full th,
+.w-full.text-left th {
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.min-w-full td,
+.w-full.text-left td {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.auth-shell {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    linear-gradient(180deg, rgba(248, 250, 252, 0.92), rgba(241, 245, 249, 0.96)),
+    radial-gradient(circle at 50% 0%, rgba(232, 160, 32, 0.14), transparent 34%);
+  padding: 24px 16px;
+}
+
+.auth-card {
+  background: #ffffff;
+  border: 1px solid var(--portal-border);
+  border-radius: 8px;
+  padding: 32px;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
 }
 
 /* ─── Stat Badge Icons ───────────────────────────────────────── */
@@ -214,3 +349,14 @@ body {
   50%       { box-shadow: 0 0 12px 3px var(--accent-glow-b); }
 }
 .pulse-glow { animation: pulse-glow 2.4s ease-in-out infinite; }
+
+@media (max-width: 768px) {
+  .portal-page-title {
+    font-size: 22px;
+  }
+
+  .portal-table th,
+  .portal-table td {
+    padding: 12px 14px;
+  }
+}

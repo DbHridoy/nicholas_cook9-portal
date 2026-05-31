@@ -1,4 +1,3 @@
-import React from 'react';
 import { Package, TrendingUp, TrendingDown, ShieldAlert, CheckCircle2, Search, Filter } from 'lucide-react';
 
 const products = [

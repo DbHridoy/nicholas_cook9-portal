@@ -1,6 +1,5 @@
-import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, User, Building2, Package, Calendar, AlertCircle, CheckCircle2, MessageSquare } from 'lucide-react';
+import { ArrowLeft, User, Building2, Package, MessageSquare } from 'lucide-react';
 
 const complaintData = {
   'CLM-8091': {

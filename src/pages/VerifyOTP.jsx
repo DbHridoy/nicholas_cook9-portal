@@ -1,11 +1,15 @@
-import React, { useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { ArrowRight, ArrowLeft } from 'lucide-react';
 import Logo from '../components/Logo';
+import { api } from '../lib/api';
 
 export default function VerifyOTP() {
   const [otp, setOtp] = useState(new Array(6).fill(''));
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const inputRefs = useRef([]);
+  const email = sessionStorage.getItem('passwordResetEmail') ?? '';
 
   const handleChange = (element, index) => {
     if (isNaN(element.value)) return false;
@@ -20,26 +24,39 @@ export default function VerifyOTP() {
 
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    navigate('/set-password');
+    setError('');
+    setIsSubmitting(true);
+
+    try {
+      const code = otp.join('');
+      const body = await api.verifyOtp(email, code);
+      sessionStorage.setItem('passwordResetToken', body.data.resetToken);
+      navigate('/set-password');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to verify code.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#F8F9FA] px-4">
+    <div className="auth-shell">
       <div className="w-full max-w-md">
-        <Logo subtitle="" showIcon={false} />
+        <Logo subtitle="Verification" />
         
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
+        <div className="auth-card">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-[#111827] mb-2">Verify OTP</h2>
             <p className="text-sm text-gray-500">
               Enter the 6-digit code sent to<br />
-              <span className="font-medium text-[#111827]">name@enterprise.com</span>
+              <span className="font-medium text-[#111827]">{email || 'your email'}</span>
             </p>
           </div>
           
           <form className="space-y-6" onSubmit={handleSubmit}>
+            {error && <div className="p-3 bg-red-50 border border-red-100 text-red-600 text-xs font-medium rounded-lg">{error}</div>}
             <div className="flex justify-between gap-2">
               {otp.map((data, index) => {
                 return (
@@ -52,6 +69,7 @@ export default function VerifyOTP() {
                     value={data}
                     onChange={e => handleChange(e.target, index)}
                     onFocus={e => e.target.select()}
+                    ref={el => inputRefs.current[index] = el}
                   />
                 );
               })}
@@ -59,16 +77,21 @@ export default function VerifyOTP() {
 
             <button
               type="submit"
-              className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-[#111827] hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#111827] transition-colors"
+              disabled={isSubmitting || !email}
+              className="portal-btn-primary w-full flex justify-center items-center py-3 px-4 text-sm"
             >
-              Verify Code
+              {isSubmitting ? 'Verifying...' : 'Verify Code'}
               <ArrowRight className="ml-2 h-4 w-4" />
             </button>
             
             <div className="pt-6 border-t border-gray-100 text-center space-y-4">
               <div>
                 <p className="text-sm text-gray-500 mb-2">Didn't receive the code?</p>
-                <button type="button" className="text-sm font-medium text-[#111827] hover:underline">
+                <button
+                  type="button"
+                  onClick={() => email && api.forgotPassword(email)}
+                  className="text-sm font-medium text-[#111827] hover:underline"
+                >
                   Resend Code
                 </button>
               </div>

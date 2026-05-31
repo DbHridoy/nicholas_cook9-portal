@@ -1,25 +1,42 @@
-import React, { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
-  LayoutDashboard, ShoppingCart, FileText, LogOut, User,
-  Menu, TrendingUp, Package, MessageSquare, X, ChevronRight,
+  LayoutDashboard, FileText, LogOut, User,
+  Menu, TrendingUp, Package, MessageSquare, X,
   FileCheck, Bell, ChevronDown,
 } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../store/authSlice';
-import Logo from '../components/Logo';
+import { api } from '../lib/api';
 
 export default function DashboardLayout() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { role: userRole, user: userEmail, isAuthenticated } = useSelector((state) => state.auth);
+  const { role: rawRole, user: userEmail, name, isAuthenticated } = useSelector((state) => state.auth);
+  const userRole = rawRole === 'super_admin' ? 'admin' : rawRole;
+  const roleLabel = rawRole === 'super_admin' ? 'Super Admin' : userRole === 'admin' ? 'Admin' : 'Dealer';
+  const displayName = name || userEmail || 'Portal User';
+  const avatarText = useMemo(() => {
+    const source = name || userEmail || 'PU';
+    return source
+      .split(/[\s@.]+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase())
+      .join('') || 'PU';
+  }, [name, userEmail]);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!isAuthenticated) navigate('/');
   }, [isAuthenticated, navigate]);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await api.logout();
+    } catch {
+      // Local logout should still proceed if the token is already expired.
+    }
     dispatch(logout());
     navigate('/');
   };
@@ -33,14 +50,14 @@ export default function DashboardLayout() {
 
   const adminNavItems = [
     { name: 'Dashboard',       path: '/dashboard',               icon: LayoutDashboard, exact: true },
-    { name: 'Dealers',         path: '/dashboard/dealers',       icon: User },
+    { name: rawRole === 'super_admin' ? 'Users' : 'Dealers', path: '/dashboard/dealers', icon: User },
     { name: 'Sales Analytics', path: '/dashboard/analytics',     icon: TrendingUp },
     { name: 'Claims',          path: '/dashboard/complaints',    icon: MessageSquare },
   ];
 
   const navItems = userRole === 'admin' ? adminNavItems : dealerNavItems;
 
-  const SidebarContent = () => (
+  const renderSidebarContent = () => (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Logo */}
       <div style={{
@@ -145,9 +162,9 @@ export default function DashboardLayout() {
         borderRadius: 10,
         border: '1px solid rgba(255,255,255,0.07)',
       }}>
-        <div style={{ fontSize: 11, fontWeight: 600, color: '#cbd5e1', marginBottom: 4 }}>Need Help?</div>
-        <div style={{ fontSize: 11, color: '#64748b' }}>(866) ledger-24</div>
-        <div style={{ fontSize: 11, color: '#64748b' }}>support@portal.com</div>
+        <div style={{ fontSize: 11, fontWeight: 600, color: '#cbd5e1', marginBottom: 4 }}>Support</div>
+        <div style={{ fontSize: 11, color: '#64748b' }}>(866) 555-2400</div>
+        <div style={{ fontSize: 11, color: '#64748b' }}>support@nicholascook.com</div>
       </div>
 
       {/* User info + logout */}
@@ -165,13 +182,13 @@ export default function DashboardLayout() {
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: 11, fontWeight: 700, color: '#fff', flexShrink: 0,
           }}>
-            {userEmail ? userEmail[0].toUpperCase() : 'U'}
+            {avatarText}
           </div>
           <div style={{ minWidth: 0 }}>
             <div style={{ fontSize: 12, fontWeight: 600, color: '#e2e8f0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {userEmail}
+              {displayName}
             </div>
-            <div style={{ fontSize: 10, color: '#64748b', textTransform: 'capitalize' }}>{userRole}</div>
+            <div style={{ fontSize: 10, color: '#64748b' }}>{roleLabel}</div>
           </div>
         </div>
 
@@ -212,7 +229,7 @@ export default function DashboardLayout() {
         top: 0,
         height: '100vh',
       }} className="desktop-sidebar">
-        <SidebarContent />
+        {renderSidebarContent()}
       </aside>
 
       {/* Mobile Sidebar Overlay */}
@@ -239,7 +256,7 @@ export default function DashboardLayout() {
         display: 'flex',
         flexDirection: 'column',
       }} className="mobile-sidebar">
-        <SidebarContent />
+        {renderSidebarContent()}
       </aside>
 
       {/* Main Content */}
@@ -262,6 +279,7 @@ export default function DashboardLayout() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
             <button
               onClick={() => setMobileOpen(true)}
+              className="mobile-menu-btn"
               style={{
                 background: 'transparent',
                 border: 'none',
@@ -274,8 +292,9 @@ export default function DashboardLayout() {
             >
               <Menu size={20} />
             </button>
-            <div style={{ fontSize: 14, color: '#4b5563', display: 'flex', alignItems: 'center', gap: 6 }}>
-              Welcome back, <span style={{ fontWeight: 600, color: '#111827' }}>Touch of Color Flooring</span> 👋
+            <div style={{ fontSize: 14, color: '#4b5563', display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
+              <span style={{ color: '#6b7280' }}>Welcome back,</span>
+              <span style={{ fontWeight: 700, color: '#111827', maxWidth: 240, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayName}</span>
               <ChevronDown size={14} style={{ color: '#6b7280', marginTop: 2 }} />
             </div>
           </div>
@@ -298,11 +317,11 @@ export default function DashboardLayout() {
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontSize: 12, fontWeight: 600, color: '#fff',
               }}>
-                JS
+                {avatarText}
               </div>
               <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <span style={{ fontSize: 13, fontWeight: 700, color: '#111827', lineHeight: 1.2 }}>John Smith</span>
-                <span style={{ fontSize: 11, color: '#6b7280', fontWeight: 500 }}>Dealer Admin</span>
+                <span style={{ fontSize: 13, fontWeight: 700, color: '#111827', lineHeight: 1.2, maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayName}</span>
+                <span style={{ fontSize: 11, color: '#6b7280', fontWeight: 500 }}>{roleLabel}</span>
               </div>
               <ChevronDown size={14} style={{ color: '#6b7280', marginLeft: 4 }} />
             </div>
@@ -326,6 +345,20 @@ export default function DashboardLayout() {
           .desktop-sidebar { display: flex !important; }
           .mobile-menu-btn { display: none !important; }
           .mobile-sidebar  { display: none !important; }
+        }
+        @media (max-width: 640px) {
+          header {
+            padding: 0 14px !important;
+          }
+          header > div:last-child {
+            gap: 12px !important;
+          }
+          header > div:last-child > div:last-child > div:last-child {
+            display: none !important;
+          }
+          main {
+            padding: 20px 14px !important;
+          }
         }
         .sidebar-nav-link:hover {
           background: rgba(255,255,255,0.07) !important;

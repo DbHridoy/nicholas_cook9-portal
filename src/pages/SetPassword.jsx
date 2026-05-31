@@ -1,30 +1,55 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, RotateCcw, ArrowLeft } from 'lucide-react';
 import Logo from '../components/Logo';
+import { api } from '../lib/api';
 
 export default function SetPassword() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    navigate('/reset-success');
+    setError('');
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const email = sessionStorage.getItem('passwordResetEmail') ?? '';
+      const resetToken = sessionStorage.getItem('passwordResetToken') ?? '';
+      await api.resetPassword(email, resetToken, password);
+      sessionStorage.removeItem('passwordResetEmail');
+      sessionStorage.removeItem('passwordResetToken');
+      navigate('/reset-success');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to reset password.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#F8F9FA] px-4">
+    <div className="auth-shell">
       <div className="w-full max-w-md">
-        <Logo subtitle="ENTERPRISE MANAGEMENT" showIcon={false} />
+        <Logo subtitle="Secure Your Account" />
         
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
+        <div className="auth-card">
           <h2 className="text-xl font-bold text-[#111827] mb-2">Set New Password</h2>
           <p className="text-sm text-gray-500 mb-6">
             Create a strong password to secure your account.
           </p>
           
           <form className="space-y-5" onSubmit={handleSubmit}>
+            {error && <div className="p-3 bg-red-50 border border-red-100 text-red-600 text-xs font-medium rounded-lg">{error}</div>}
             <div>
               <label className="block text-xs font-medium text-gray-600 mb-2">
                 New Password
@@ -32,6 +57,8 @@ export default function SetPassword() {
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="block w-full pl-3 pr-10 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#111827] focus:border-transparent text-sm"
                   placeholder="••••••••"
                   required
@@ -53,6 +80,8 @@ export default function SetPassword() {
               <div className="relative">
                 <input
                   type={showConfirmPassword ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                   className="block w-full pl-3 pr-10 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#111827] focus:border-transparent text-sm"
                   placeholder="••••••••"
                   required
@@ -69,9 +98,10 @@ export default function SetPassword() {
 
             <button
               type="submit"
-              className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-[#111827] hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#111827] transition-colors mt-2"
+              disabled={isSubmitting}
+              className="portal-btn-primary w-full flex justify-center items-center py-3 px-4 text-sm mt-2"
             >
-              Reset Password
+              {isSubmitting ? 'Resetting...' : 'Reset Password'}
               <RotateCcw className="ml-2 h-4 w-4" />
             </button>
             

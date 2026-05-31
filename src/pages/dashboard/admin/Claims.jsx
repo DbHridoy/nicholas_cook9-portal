@@ -1,39 +1,69 @@
-import React, { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Filter, Eye, MoreVertical, MessageSquare } from 'lucide-react';
+import { api } from '../../../lib/api';
 
-const claims = [
-  { id: 'CLM-8091', customer: 'Acme Corp', dealer: 'Main Street Motors', status: 'Resolved', date: '2026-05-01' },
-  { id: 'CLM-8092', customer: 'Globex Inc', dealer: 'Downtown Auto', status: 'Unresolved', date: '2026-05-03' },
-  { id: 'CLM-8093', customer: 'Initech', dealer: 'Elite Vehicles', status: 'Resolved', date: '2026-05-04' },
-  { id: 'CLM-8094', customer: 'Umbrella Corp', dealer: 'Valley Ford', status: 'Unresolved', date: '2026-05-06' },
-  { id: 'CLM-8095', customer: 'Stark Industries', dealer: 'Main Street Motors', status: 'Resolved', date: '2026-05-07' },
-];
+const statusLabel = {
+  pending: 'Pending',
+  approved: 'Approved',
+  denied: 'Denied',
+};
+
+const statusClass = {
+  pending: 'badge-pending',
+  approved: 'badge-resolved',
+  denied: 'badge-unresolved',
+};
+
+const formatDate = (value) => value ? new Date(value).toLocaleDateString() : '-';
 
 export default function Claims() {
   const navigate = useNavigate();
+  const [claims, setClaims] = useState([]);
   const [search, setSearch] = useState('');
-  const [dealerFilter, setDealerFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
 
-  const filtered = claims.filter(c => {
+  useEffect(() => {
+    let active = true;
+
+    api.listClaims()
+      .then((data) => {
+        if (active) setClaims(data);
+      })
+      .catch((err) => {
+        if (active) setError(err instanceof Error ? err.message : 'Unable to load claims.');
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const filtered = useMemo(() => claims.filter((claim) => {
     const q = search.toLowerCase();
-    const matchSearch = !q || c.id.toLowerCase().includes(q) || c.customer.toLowerCase().includes(q) || c.dealer.toLowerCase().includes(q);
-    const matchDealer = dealerFilter === 'all' || c.dealer === dealerFilter;
-    return matchSearch && matchDealer;
-  });
-
-  const dealers = [...new Set(claims.map(c => c.dealer))];
+    const matchSearch = !q
+      || claim._id?.toLowerCase().includes(q)
+      || claim.name?.toLowerCase().includes(q)
+      || claim.email?.toLowerCase().includes(q)
+      || claim.orderId?.toLowerCase().includes(q);
+    const matchStatus = statusFilter === 'all' || claim.status === statusFilter;
+    return matchSearch && matchStatus;
+  }), [claims, search, statusFilter]);
 
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-      {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
         <div>
           <h1 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.02em' }}>
             Claims Management
           </h1>
           <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4, margin: '4px 0 0' }}>
-            Review and manage all customer claims submitted across all dealers.
+            Review and manage all customer claims submitted through the website.
           </p>
         </div>
         <div style={{
@@ -45,14 +75,18 @@ export default function Claims() {
         }}>
           <MessageSquare size={14} style={{ color: '#2563eb' }} />
           <span style={{ fontSize: 13, fontWeight: 600, color: '#2563eb' }}>
-            {claims.filter(c => c.status === 'Unresolved').length} Open
+            {claims.filter(c => c.status === 'pending').length} Open
           </span>
         </div>
       </div>
 
-      {/* Table Card */}
+      {error && (
+        <div style={{ padding: '10px 14px', border: '1px solid rgba(220,38,38,0.18)', background: 'rgba(220,38,38,0.07)', color: '#dc2626', borderRadius: 8, fontSize: 13 }}>
+          {error}
+        </div>
+      )}
+
       <div className="portal-card" style={{ overflow: 'hidden' }}>
-        {/* Filters */}
         <div style={{
           padding: '14px 18px',
           borderBottom: '1px solid #e9ecef',
@@ -68,7 +102,7 @@ export default function Claims() {
             }} />
             <input
               type="text"
-              placeholder="Search by customer, dealer or claim ID..."
+              placeholder="Search by customer, email, order ID or claim ID..."
               value={search}
               onChange={e => setSearch(e.target.value)}
               className="portal-input"
@@ -76,52 +110,63 @@ export default function Claims() {
             />
           </div>
           <select
-            value={dealerFilter}
-            onChange={e => setDealerFilter(e.target.value)}
+            value={statusFilter}
+            onChange={e => setStatusFilter(e.target.value)}
             className="portal-input"
             style={{ padding: '8px 12px', fontSize: 13, cursor: 'pointer' }}
           >
-            <option value="all">All Dealers</option>
-            {dealers.map(d => <option key={d} value={d}>{d}</option>)}
+            <option value="all">All Statuses</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="denied">Denied</option>
           </select>
           <button className="portal-btn-ghost" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', fontSize: 13 }}>
             <Filter size={13} /> Filter
           </button>
         </div>
 
-        {/* Table */}
         <div style={{ overflowX: 'auto' }}>
           <table className="portal-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr>
                 <th style={{ textAlign: 'left' }}>Claim ID</th>
                 <th style={{ textAlign: 'left' }}>Customer</th>
-                <th style={{ textAlign: 'left' }}>Dealer</th>
+                <th style={{ textAlign: 'left' }}>Order ID</th>
+                <th style={{ textAlign: 'left' }}>Flooring</th>
                 <th style={{ textAlign: 'left' }}>Status</th>
                 <th style={{ textAlign: 'left' }}>Date</th>
                 <th style={{ textAlign: 'right' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {filtered.map((item) => (
-                <tr key={item.id}>
+              {loading && (
+                <tr><td colSpan={7} style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-muted)' }}>Loading claims...</td></tr>
+              )}
+              {!loading && filtered.map((item) => (
+                <tr key={item._id}>
                   <td>
                     <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontFamily: 'monospace', fontSize: 13 }}>
-                      {item.id}
+                      {item._id}
                     </span>
                   </td>
-                  <td>{item.customer}</td>
-                  <td>{item.dealer}</td>
                   <td>
-                    <span className={item.status === 'Resolved' ? 'badge-resolved' : 'badge-unresolved'}>
-                      {item.status}
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <span>{item.name}</span>
+                      <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{item.email}</span>
+                    </div>
+                  </td>
+                  <td>{item.orderId}</td>
+                  <td>{item.flooringType}</td>
+                  <td>
+                    <span className={statusClass[item.status] ?? 'badge-pending'}>
+                      {statusLabel[item.status] ?? item.status}
                     </span>
                   </td>
-                  <td>{item.date}</td>
+                  <td>{formatDate(item.createdAt)}</td>
                   <td style={{ textAlign: 'right' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 4 }}>
                       <button
-                        onClick={() => navigate(`/dashboard/complaints/${item.id}`)}
+                        onClick={() => navigate(`/dashboard/complaints/${item._id}`)}
                         style={{
                           background: 'rgba(37,99,235,0.07)',
                           border: '1px solid rgba(37,99,235,0.18)',
@@ -131,10 +176,7 @@ export default function Claims() {
                           cursor: 'pointer',
                           display: 'flex', alignItems: 'center', gap: 5,
                           fontSize: 12, fontWeight: 500,
-                          transition: 'background 0.2s',
                         }}
-                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(37,99,235,0.14)'}
-                        onMouseLeave={e => e.currentTarget.style.background = 'rgba(37,99,235,0.07)'}
                       >
                         <Eye size={13} /> View
                       </button>
@@ -149,9 +191,9 @@ export default function Claims() {
                   </td>
                 </tr>
               ))}
-              {filtered.length === 0 && (
+              {!loading && filtered.length === 0 && (
                 <tr>
-                  <td colSpan={6} style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-muted)' }}>
+                  <td colSpan={7} style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-muted)' }}>
                     No claims found matching your search.
                   </td>
                 </tr>
