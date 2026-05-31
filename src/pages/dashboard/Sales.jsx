@@ -13,7 +13,10 @@ const toContractRow = (contract) => ({
   source: contract.file?.startsWith('manual/') ? 'manual' : 'uploaded',
 });
 
+const MAX_CONTRACT_FILE_SIZE = 25 * 1024 * 1024;
+
 const emptyForm = {
+  orderId: '',
   customer: '',
   amount: '',
   propertyAddress: '',
@@ -28,8 +31,7 @@ export default function Contracts() {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [formError, setFormError] = useState('');
-  const [uploadedFile, setUploadedFile] = useState(null);
-  const [dragOver, setDragOver] = useState(false);
+  const [contractFile, setContractFile] = useState(null);
   const [successMsg, setSuccessMsg] = useState('');
   const [loading, setLoading] = useState(true);
   const fileInputRef = useRef();
@@ -56,40 +58,44 @@ export default function Contracts() {
     return !q || c.id.toLowerCase().includes(q) || c.customer.toLowerCase().includes(q);
   });
 
-  const handleFileDrop = (e) => {
-    e.preventDefault();
-    setDragOver(false);
-    const file = e.dataTransfer?.files?.[0] || e.target.files?.[0];
-    if (file && file.type === 'application/pdf') {
-      setUploadedFile(file);
-      showSuccess(`"${file.name}" ready to attach to a contract.`);
-    } else if (file) {
-      setFormError('Only PDF files are accepted.');
-      setTimeout(() => setFormError(''), 3000);
+  const handleContractFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > MAX_CONTRACT_FILE_SIZE) {
+      setFormError('Contract file must be 25 MB or smaller.');
+      e.target.value = '';
+      return;
     }
+
+    setContractFile(file);
+    setFormError('');
   };
 
   const handleManualSubmit = async () => {
-    if (!form.customer.trim() || !form.amount.trim() || !form.propertyAddress.trim() || !form.installationDate) {
+    if (!form.orderId.trim() || !form.customer.trim() || !form.amount.trim() || !form.propertyAddress.trim() || !form.installationDate || !contractFile) {
       setFormError('All fields are required.');
       return;
     }
 
     try {
       const created = await api.createContract({
+        orderId: form.orderId.trim(),
         name: form.customer.trim(),
         propertyAddress: form.propertyAddress.trim(),
         installationDate: form.installationDate,
         coveredProduct: form.coveredProduct,
         term: form.term,
         price: Number(form.amount),
-        file: `manual/${form.customer.trim().replace(/\s+/g, '-').toLowerCase()}`,
+        file: contractFile.name,
       });
       setContracts(prev => [toContractRow(created), ...prev]);
       setForm(emptyForm);
+      setContractFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = '';
       setShowForm(false);
       setFormError('');
-      showSuccess('Contract added manually.');
+      showSuccess('Contract added.');
     } catch (err) {
       setFormError(err instanceof Error ? err.message : 'Unable to create contract.');
     }
@@ -112,21 +118,13 @@ export default function Contracts() {
         </div>
         <div style={{ display: 'flex', gap: 10 }}>
           <button
-            onClick={() => fileInputRef.current.click()}
-            className="portal-btn-ghost"
-            style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '9px 16px', fontSize: 13 }}
-          >
-            <Upload size={14} /> Upload PDF
-          </button>
-          <button
             onClick={() => { setShowForm(p => !p); setFormError(''); }}
             className="portal-btn-primary"
             style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '9px 16px', fontSize: 13 }}
           >
-            <Plus size={14} /> Manual Entry
+            <Plus size={14} /> Add contract
           </button>
         </div>
-        <input ref={fileInputRef} type="file" accept=".pdf" style={{ display: 'none' }} onChange={handleFileDrop} />
       </div>
 
       {/* Success Toast */}
@@ -135,46 +133,6 @@ export default function Contracts() {
           <CheckCircle2 size={15} /> {successMsg}
         </div>
       )}
-
-      {/* PDF Drop Zone */}
-      <div
-        onClick={() => fileInputRef.current.click()}
-        onDragOver={e => { e.preventDefault(); setDragOver(true); }}
-        onDragLeave={() => setDragOver(false)}
-        onDrop={handleFileDrop}
-        style={{
-          border: `2px dashed ${dragOver ? '#2563eb' : uploadedFile ? 'rgba(16,185,129,0.45)' : '#d1d5db'}`,
-          borderRadius: 14,
-          padding: '28px 20px',
-          textAlign: 'center',
-          cursor: 'pointer',
-          background: dragOver ? 'rgba(37,99,235,0.04)' : uploadedFile ? 'rgba(16,185,129,0.03)' : '#fafafa',
-          transition: 'all 0.2s',
-        }}
-      >
-        <div style={{ display: 'inline-flex', padding: 12, background: 'rgba(37,99,235,0.08)', borderRadius: 12, marginBottom: 12 }}>
-          <FileText size={24} style={{ color: '#2563eb' }} />
-        </div>
-        {uploadedFile ? (
-          <>
-            <p style={{ fontSize: 14, fontWeight: 600, color: '#059669', margin: 0 }}>✓ {uploadedFile.name}</p>
-            <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>{(uploadedFile.size / 1024).toFixed(1)} KB · PDF</p>
-          </>
-        ) : (
-          <>
-            <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>Drop a contract PDF here, or click to browse</p>
-            <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 5 }}>Scanned or digital PDF contracts accepted · Max 25 MB</p>
-          </>
-        )}
-        {uploadedFile && (
-          <button
-            onClick={e => { e.stopPropagation(); setUploadedFile(null); }}
-            style={{ marginTop: 10, background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12 }}
-          >
-            <X size={12} /> Remove
-          </button>
-        )}
-      </div>
 
       {/* Manual Entry Form */}
       {showForm && (
@@ -193,6 +151,19 @@ export default function Contracts() {
           )}
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 14, marginBottom: 16 }}>
+            <div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 7 }}>
+                <Hash size={10} /> Order ID
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. ORDER-1001"
+                value={form.orderId}
+                onChange={e => setForm(p => ({ ...p, orderId: e.target.value }))}
+                className="portal-input"
+                style={{ width: '100%', padding: '9px 12px', fontSize: 13 }}
+              />
+            </div>
             <div>
               <label style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 7 }}>
                 <Hash size={10} /> Property Address
@@ -274,13 +245,28 @@ export default function Contracts() {
                 <option value="5_year_coverage">5 Year Coverage</option>
               </select>
             </div>
+            <div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 7 }}>
+                <Upload size={10} /> Contract File
+              </label>
+              <input
+                ref={fileInputRef}
+                type="file"
+                onChange={handleContractFileChange}
+                className="portal-input"
+                style={{ width: '100%', padding: '8px 12px', fontSize: 13 }}
+              />
+              <p style={{ margin: '6px 0 0', fontSize: 11, color: 'var(--text-muted)' }}>
+                {contractFile ? `${contractFile.name} (${(contractFile.size / 1024).toFixed(1)} KB)` : 'PDF or other contract file format, max 25 MB.'}
+              </p>
+            </div>
           </div>
 
           <div style={{ display: 'flex', gap: 10 }}>
             <button onClick={handleManualSubmit} className="portal-btn-primary" style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '9px 20px', fontSize: 13 }}>
-              <Plus size={14} /> Add Contract
+              Save
             </button>
-            <button onClick={() => { setShowForm(false); setForm(emptyForm); setFormError(''); }} className="portal-btn-ghost" style={{ padding: '9px 16px', fontSize: 13 }}>
+            <button onClick={() => { setShowForm(false); setForm(emptyForm); setContractFile(null); setFormError(''); if (fileInputRef.current) fileInputRef.current.value = ''; }} className="portal-btn-ghost" style={{ padding: '9px 16px', fontSize: 13 }}>
               Cancel
             </button>
           </div>

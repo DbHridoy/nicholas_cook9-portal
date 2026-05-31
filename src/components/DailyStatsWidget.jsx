@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Users, FileCheck, DollarSign, TrendingUp, BarChart2, Save, CalendarDays, CheckCircle2 } from 'lucide-react';
+import { api } from '../lib/api';
 
 const defaultForm = {
   date: new Date().toISOString().slice(0, 10),
@@ -15,6 +16,33 @@ export default function DailyStatsWidget() {
   const [saved, setSaved] = useState(false);
   const [savedData, setSavedData] = useState(null);
   const [autoCalc, setAutoCalc] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let active = true;
+
+    api.listDailyStats()
+      .then((data) => {
+        if (!active || data.length === 0) return;
+
+        const latest = data[0];
+        setSavedData({
+          date: latest.date?.slice(0, 10) ?? defaultForm.date,
+          customers: String(latest.customers ?? ''),
+          contractsSold: String(latest.contractsSold ?? ''),
+          avgSaleValue: String(latest.avgSaleValue ?? ''),
+          totalSales: String(latest.totalSales ?? ''),
+          conversionRate: String(latest.conversionRate ?? ''),
+        });
+      })
+      .catch((err) => {
+        if (active) setError(err instanceof Error ? err.message : 'Unable to load daily stats.');
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const handleChange = (field, value) => {
     const updated = { ...form, [field]: value };
@@ -34,10 +62,30 @@ export default function DailyStatsWidget() {
     setSaved(false);
   };
 
-  const handleSave = () => {
-    setSavedData({ ...form });
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+  const handleSave = async () => {
+    try {
+      const savedStat = await api.saveDailyStat({
+        date: form.date,
+        customers: Number(form.customers),
+        contractsSold: Number(form.contractsSold),
+        avgSaleValue: Number(form.avgSaleValue || 0),
+        totalSales: Number(form.totalSales || 0),
+        conversionRate: Number(form.conversionRate || 0),
+      });
+      setSavedData({
+        date: savedStat.date?.slice(0, 10) ?? form.date,
+        customers: String(savedStat.customers),
+        contractsSold: String(savedStat.contractsSold),
+        avgSaleValue: String(savedStat.avgSaleValue),
+        totalSales: String(savedStat.totalSales),
+        conversionRate: String(savedStat.conversionRate),
+      });
+      setSaved(true);
+      setError('');
+      setTimeout(() => setSaved(false), 3000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to save daily stats.');
+    }
   };
 
   const isValid = form.customers && form.contractsSold;
@@ -224,6 +272,11 @@ export default function DailyStatsWidget() {
       </div>
 
       {/* Save Button */}
+      {error && (
+        <div style={{ marginBottom: 12, padding: '9px 14px', background: 'rgba(220,38,38,0.07)', border: '1px solid rgba(220,38,38,0.18)', borderRadius: 8, fontSize: 12, color: '#dc2626' }}>
+          {error}
+        </div>
+      )}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         <button
           onClick={handleSave}

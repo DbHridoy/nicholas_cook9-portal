@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, FileText, LogOut, User,
-  Menu, TrendingUp, Package, MessageSquare, X,
+  Menu, TrendingUp, MessageSquare, X,
   FileCheck, Bell, ChevronDown,
 } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
@@ -42,17 +42,17 @@ export default function DashboardLayout() {
   };
 
   const dealerNavItems = [
-    { name: 'Dashboard',  path: '/dashboard',          icon: LayoutDashboard, exact: true },
-    { name: 'Contracts',  path: '/dashboard/sales',    icon: FileCheck },
-    { name: 'Products',   path: '/dashboard/products', icon: Package },
-    { name: 'Claims',     path: '/dashboard/reports',  icon: FileText },
+    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, exact: true },
+    { name: 'Contracts', path: '/dashboard/sales', icon: FileCheck },
+    // { name: 'Products', path: '/dashboard/products', icon: Package },
+    { name: 'Claims', path: '/dashboard/reports', icon: FileText },
   ];
 
   const adminNavItems = [
-    { name: 'Dashboard',       path: '/dashboard',               icon: LayoutDashboard, exact: true },
+    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, exact: true },
     { name: rawRole === 'super_admin' ? 'Users' : 'Dealers', path: '/dashboard/dealers', icon: User },
-    { name: 'Sales Analytics', path: '/dashboard/analytics',     icon: TrendingUp },
-    { name: 'Claims',          path: '/dashboard/complaints',    icon: MessageSquare },
+    { name: 'Sales Analytics', path: '/dashboard/analytics', icon: TrendingUp },
+    { name: 'Claims', path: '/dashboard/complaints', icon: MessageSquare },
   ];
 
   const navItems = userRole === 'admin' ? adminNavItems : dealerNavItems;
@@ -82,10 +82,9 @@ export default function DashboardLayout() {
           }}>N</div>
           <div>
             <div style={{ fontSize: 13, fontWeight: 700, color: '#f8fafc', letterSpacing: '-0.01em' }}>
-              Nicholas Cook
-            </div>
+              Axisone            </div>
             <div style={{ fontSize: 10, color: '#64748b', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-              {userRole} Portal
+              Portal
             </div>
           </div>
         </div>
@@ -99,15 +98,8 @@ export default function DashboardLayout() {
         </button>
       </div>
 
-      {/* Nav section label */}
-      <div style={{ padding: '20px 20px 6px' }}>
-        <span style={{ fontSize: 10, fontWeight: 600, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.10em' }}>
-          {userRole === 'admin' ? 'Admin' : 'Dealer'} Portal
-        </span>
-      </div>
-
       {/* Nav Items */}
-      <nav style={{ flex: 1, padding: '4px 10px', overflowY: 'auto' }}>
+      <nav style={{ flex: 1, padding: '20px 10px 4px', overflowY: 'auto' }}>
         {navItems.map((item) => (
           <NavLink
             key={item.name}
@@ -154,49 +146,12 @@ export default function DashboardLayout() {
         ))}
       </nav>
 
-      {/* Need Help block */}
-      <div style={{
-        margin: '0 10px 12px',
-        padding: '12px 14px',
-        background: 'rgba(255,255,255,0.04)',
-        borderRadius: 10,
-        border: '1px solid rgba(255,255,255,0.07)',
-      }}>
-        <div style={{ fontSize: 11, fontWeight: 600, color: '#cbd5e1', marginBottom: 4 }}>Support</div>
-        <div style={{ fontSize: 11, color: '#64748b' }}>(866) 555-2400</div>
-        <div style={{ fontSize: 11, color: '#64748b' }}>support@nicholascook.com</div>
-      </div>
-
-      {/* User info + logout */}
       <div style={{ padding: '12px 10px', borderTop: '1px solid rgba(255,255,255,0.07)', flexShrink: 0 }}>
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 10,
-          padding: '10px 12px',
-          background: 'rgba(255,255,255,0.05)',
-          borderRadius: 10,
-          marginBottom: 8,
-        }}>
-          <div style={{
-            width: 30, height: 30, borderRadius: '50%',
-            background: 'linear-gradient(135deg, #e8a020, #f5bc50)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 11, fontWeight: 700, color: '#fff', flexShrink: 0,
-          }}>
-            {avatarText}
-          </div>
-          <div style={{ minWidth: 0 }}>
-            <div style={{ fontSize: 12, fontWeight: 600, color: '#e2e8f0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {displayName}
-            </div>
-            <div style={{ fontSize: 10, color: '#64748b' }}>{roleLabel}</div>
-          </div>
-        </div>
-
         <button
           onClick={handleLogout}
           style={{
             display: 'flex', alignItems: 'center', gap: 8,
-            width: '100%', padding: '9px 14px',
+            width: '100%', padding: '10px 14px',
             background: 'rgba(239,68,68,0.07)',
             border: '1px solid rgba(239,68,68,0.14)',
             borderRadius: 9,

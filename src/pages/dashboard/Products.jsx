@@ -1,12 +1,6 @@
+import { useEffect, useMemo, useState } from 'react';
 import { Package, TrendingUp, TrendingDown, ShieldAlert, CheckCircle2, Search, Filter } from 'lucide-react';
-
-const products = [
-  { id: 1, name: 'EcoPower Generator X1', category: 'Energy', sold: 450, claims: 12, category_avg_claims: 15 },
-  { id: 2, name: 'SmartHub Controller Pro', category: 'Automation', sold: 1200, claims: 145, category_avg_claims: 40 },
-  { id: 3, name: 'ThermalSense Sensor V2', category: 'Sensors', sold: 890, claims: 8, category_avg_claims: 12 },
-  { id: 4, name: 'Industrial Pump GP-500', category: 'Industrial', sold: 150, claims: 32, category_avg_claims: 10 },
-  { id: 5, name: 'Precision Flow Meter', category: 'Sensors', sold: 670, claims: 15, category_avg_claims: 12 },
-];
+import { api } from '../../lib/api';
 
 const PerformanceBadge = ({ score }) => {
   let color = 'text-green-600 bg-green-50 border-green-100';
@@ -28,6 +22,35 @@ const PerformanceBadge = ({ score }) => {
 };
 
 export default function Products() {
+  const [performance, setPerformance] = useState({ averageReliability: 0, totalProducts: 0, atRiskProducts: 0, products: [] });
+  const [search, setSearch] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+
+    api.getProductPerformance()
+      .then((data) => {
+        if (active) setPerformance({ averageReliability: 0, totalProducts: 0, atRiskProducts: 0, products: [], ...data });
+      })
+      .catch((err) => {
+        if (active) setError(err instanceof Error ? err.message : 'Unable to load product performance.');
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const products = useMemo(() => performance.products.filter((product) => {
+    const q = search.toLowerCase();
+    return !q || product.name.toLowerCase().includes(q) || product.category.toLowerCase().includes(q);
+  }), [performance.products, search]);
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -49,15 +72,15 @@ export default function Products() {
             <p className="text-sm font-medium text-gray-500">Average Reliability</p>
             <CheckCircle2 className="h-5 w-5 text-green-500" />
           </div>
-          <h3 className="text-2xl font-bold text-[#111827]">94.2%</h3>
-          <p className="text-xs text-green-600 mt-1 font-medium">+1.2% from last month</p>
+          <h3 className="text-2xl font-bold text-[#111827]">{loading ? '...' : `${performance.averageReliability}%`}</h3>
+          <p className="text-xs text-gray-500 mt-1 font-medium">Based on current contracts and claims</p>
         </div>
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
           <div className="flex items-center justify-between mb-2">
             <p className="text-sm font-medium text-gray-500">Total Products</p>
             <Package className="h-5 w-5 text-blue-500" />
           </div>
-          <h3 className="text-2xl font-bold text-[#111827]">24</h3>
+          <h3 className="text-2xl font-bold text-[#111827]">{loading ? '...' : performance.totalProducts}</h3>
           <p className="text-xs text-gray-500 mt-1">Across 4 categories</p>
         </div>
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
@@ -65,10 +88,12 @@ export default function Products() {
             <p className="text-sm font-medium text-gray-500">At Risk Products</p>
             <ShieldAlert className="h-5 w-5 text-red-500" />
           </div>
-          <h3 className="text-2xl font-bold text-[#111827]">2</h3>
+          <h3 className="text-2xl font-bold text-[#111827]">{loading ? '...' : performance.atRiskProducts}</h3>
           <p className="text-xs text-red-600 mt-1 font-medium">Immediate review required</p>
         </div>
       </div>
+
+      {error && <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">{error}</div>}
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="p-4 border-b border-gray-100">
@@ -76,6 +101,8 @@ export default function Products() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <input
               type="text"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
               placeholder="Search products..."
               className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#111827] outline-none"
             />
@@ -95,9 +122,9 @@ export default function Products() {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {products.map((product) => {
-                const claimRate = ((product.claims / product.sold) * 100).toFixed(1);
-                const performanceScore = 100 - (parseFloat(claimRate) * 5); // Simple calculation for demo
-                const isUnderperforming = parseFloat(claimRate) > (product.category_avg_claims / 10);
+                const claimRate = product.claimRate.toFixed(1);
+                const performanceScore = product.performanceScore;
+                const isUnderperforming = performanceScore < 70;
 
                 return (
                   <tr key={product.id} className="hover:bg-gray-50 transition-colors">
@@ -115,7 +142,7 @@ export default function Products() {
                         <span className={`text-sm font-semibold ${isUnderperforming ? 'text-red-600' : 'text-gray-900'}`}>
                           {claimRate}%
                         </span>
-                        <span className="text-[10px] text-gray-400">Avg: {(product.category_avg_claims / 10).toFixed(1)}%</span>
+                        <span className="text-[10px] text-gray-400">{product.claims} claims</span>
                       </div>
                     </td>
                     <td className="px-6 py-4">

@@ -24,8 +24,9 @@ export function clearSession() {
 
 async function request(path, options = {}) {
   const session = getStoredSession();
+  const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
   const headers = {
-    ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+    ...(options.body && !isFormData ? { 'Content-Type': 'application/json' } : {}),
     ...(session?.accessToken ? { Authorization: `Bearer ${session.accessToken}` } : {}),
     ...options.headers,
   };
@@ -88,6 +89,10 @@ export const api = {
     return request('/users').then((body) => body.data.users);
   },
 
+  getUser(id) {
+    return request(`/users/${id}`).then((body) => body.data.user);
+  },
+
   createDealer(payload) {
     return request('/users/dealers', {
       method: 'POST',
@@ -100,6 +105,18 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(payload),
     }).then((body) => body.data.user);
+  },
+
+  getDashboard() {
+    return request('/dashboard').then((body) => body.data.dashboard);
+  },
+
+  getAnalytics() {
+    return request('/dashboard/analytics').then((body) => body.data.analytics);
+  },
+
+  getProductPerformance() {
+    return request('/dashboard/products').then((body) => body.data.productPerformance);
   },
 
   listClaims() {
@@ -130,5 +147,16 @@ export const api = {
 
   getContract(id) {
     return request(`/contracts/${id}`).then((body) => body.data.contract);
+  },
+
+  listDailyStats() {
+    return request('/daily-stats').then((body) => body.data.dailyStats);
+  },
+
+  saveDailyStat(payload) {
+    return request('/daily-stats', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }).then((body) => body.data.dailyStat);
   },
 };
