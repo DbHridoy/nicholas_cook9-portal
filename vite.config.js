@@ -14,7 +14,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://nicholas-cook9-backend.onrender.com',
+        target: 'https://api.axisonedata.com',
         changeOrigin: true,
       },
     },
