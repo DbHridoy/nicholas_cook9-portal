@@ -19,6 +19,7 @@ import SalesDetails from './pages/dashboard/SalesDetails';
 import Reports from './pages/dashboard/Reports';
 import ClaimDetails from './pages/dashboard/ClaimDetails';
 import Products from './pages/dashboard/Products';
+import DailySales from './pages/dashboard/DailySales';
 
 // Admin pages
 import DealerList from './pages/dashboard/admin/DealerList';
@@ -64,6 +65,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute role="dealer">
             <Sales />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'daily-sales',
+        element: (
+          <ProtectedRoute role="dealer">
+            <DailySales />
           </ProtectedRoute>
         ),
       },

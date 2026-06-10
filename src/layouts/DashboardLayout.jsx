@@ -91,6 +91,7 @@ export default function DashboardLayout() {
   const dealerNavItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, exact: true },
     { name: 'Contracts', path: '/dashboard/sales', icon: FileCheck },
+    { name: 'Daily Sales', path: '/dashboard/daily-sales', icon: TrendingUp },
     // { name: 'Products', path: '/dashboard/products', icon: Package },
     { name: 'Claims', path: '/dashboard/reports', icon: FileText },
   ];

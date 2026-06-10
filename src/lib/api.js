@@ -224,6 +224,30 @@ export const api = {
     }).then((body) => body.data.dailyStat);
   },
 
+  listDailySales(params = {}) {
+    const searchParams = new URLSearchParams();
+
+    if (params.date) searchParams.set('date', params.date);
+    if (params.search) searchParams.set('search', params.search);
+
+    const query = searchParams.toString();
+
+    return request(`/daily-sales${query ? `?${query}` : ''}`).then((body) => body.data);
+  },
+
+  createDailySale(payload) {
+    return request('/daily-sales', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }).then((body) => body.data.dailySale);
+  },
+
+  deleteDailySale(id) {
+    return request(`/daily-sales/${id}`, {
+      method: 'DELETE',
+    });
+  },
+
   listNotifications() {
     return request('/notifications').then((body) => body.data);
   },
