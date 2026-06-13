@@ -109,20 +109,11 @@ export default function DashboardLayout() {
     <div className="flex h-full flex-col">
       {/* Logo */}
       <div className="flex h-[68px] shrink-0 items-center justify-between border-b border-white/10 px-5">
-        <div className="flex items-center gap-2.5">
-          {/* Gold "L"-style logo mark */}
-          <div className="flex h-[34px] w-[34px] items-center justify-center rounded-lg bg-[linear-gradient(135deg,#e8a020_0%,#f5bc50_100%)] text-[15px] font-black text-white shadow-[0_4px_14px_rgba(232,160,32,0.40)]">
-            N
-          </div>
-          <div>
-            <div className="text-[13px] font-bold text-slate-50">
-              Axisone
-            </div>
-            <div className="text-[10px] font-medium uppercase tracking-[0.06em] text-slate-500">
-              Portal
-            </div>
-          </div>
-        </div>
+        <img
+          src="/ledger-logo.svg"
+          alt="Ledger logo"
+          className="brightness-0 invert"
+        />
         {/* Mobile close */}
         <button
           onClick={() => setMobileOpen(false)}
