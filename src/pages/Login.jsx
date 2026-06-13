@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, ArrowRight } from 'lucide-react';
-import Logo from '../components/Logo';
 
 import { useDispatch } from 'react-redux';
 import { login } from '../store/authSlice';
@@ -34,7 +33,7 @@ export default function Login() {
   return (
     <div className="auth-shell">
       <div className="w-full max-w-md">
-        <Logo subtitle="Portal Access" />
+        <img src="/ledger-logo.svg" alt="Ledger logo" />
         
         <div className="auth-card">
           <form className="space-y-6" onSubmit={handleLogin}>
