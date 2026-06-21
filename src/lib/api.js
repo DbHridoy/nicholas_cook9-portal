@@ -158,6 +158,12 @@ export const api = {
     }).then((body) => body.data.user);
   },
 
+  deleteUser(id) {
+    return request(`/users/${id}`, {
+      method: 'DELETE',
+    });
+  },
+
   getDashboard() {
     return request('/dashboard').then((body) => body.data.dashboard);
   },

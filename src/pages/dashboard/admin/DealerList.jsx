@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { ArrowUpRight, Ban, CheckCircle2, ExternalLink, Plus, Search, Store, Users } from 'lucide-react';
+import { ArrowUpRight, Ban, CheckCircle2, ExternalLink, Plus, Search, Store, Trash2, Users } from 'lucide-react';
 import { api } from '../../../lib/api';
 
 const getInitials = (name = '') => name
@@ -45,6 +46,8 @@ export default function DealerList() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [updatingUserId, setUpdatingUserId] = useState(null);
+  const [deletingUserId, setDeletingUserId] = useState(null);
+  const [confirmAction, setConfirmAction] = useState(null);
 
   useEffect(() => {
     let active = true;
@@ -97,6 +100,43 @@ export default function DealerList() {
       setUpdatingUserId(null);
     }
   };
+
+  const handleDeleteUser = async (user) => {
+    setError('');
+    setDeletingUserId(user._id);
+
+    try {
+      await api.deleteUser(user._id);
+      setUsers((prev) => prev.filter((item) => item._id !== user._id));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to delete user.');
+    } finally {
+      setDeletingUserId(null);
+    }
+  };
+
+  const handleConfirmAction = async () => {
+    if (!confirmAction) {
+      return;
+    }
+
+    if (confirmAction.type === 'delete') {
+      await handleDeleteUser(confirmAction.user);
+      setConfirmAction(null);
+      return;
+    }
+
+    if (confirmAction.type === 'status') {
+      await handleToggleStatus(confirmAction.user);
+      setConfirmAction(null);
+    }
+  };
+
+  const isConfirmLoading = confirmAction
+    ? confirmAction.type === 'delete'
+      ? deletingUserId === confirmAction.user._id
+      : updatingUserId === confirmAction.user._id
+    : false;
 
   return (
     <div className="flex flex-col gap-5.5 animate-fade-in">
@@ -219,7 +259,7 @@ export default function DealerList() {
                       </button>
                       {isSuperAdmin && (
                         <button
-                          onClick={() => handleToggleStatus(user)}
+                          onClick={() => setConfirmAction({ type: 'status', user })}
                           disabled={updatingUserId === user._id}
                           className={`rounded-[7px] border px-2.5 py-1.5 text-xs font-bold disabled:cursor-not-allowed disabled:opacity-60 ${
                             user.status === 'active'
@@ -230,6 +270,14 @@ export default function DealerList() {
                           {updatingUserId === user._id ? 'Saving...' : user.status === 'active' ? 'Block' : 'Activate'}
                         </button>
                       )}
+                      <button
+                        onClick={() => setConfirmAction({ type: 'delete', user })}
+                        disabled={deletingUserId === user._id}
+                        className="inline-flex cursor-pointer items-center justify-center rounded-[7px] border border-red-500/10 bg-red-500/10 p-2 text-red-500 hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+                        title={deletingUserId === user._id ? 'Deleting user' : 'Delete user'}
+                      >
+                        <Trash2 size={13} />
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -241,6 +289,61 @@ export default function DealerList() {
           </table>
         </div>
       </div>
+
+      {confirmAction && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4">
+          <div className="absolute inset-0 backdrop-blur-sm" />
+          <div className="relative z-10 w-full max-w-md rounded-2xl border border-portal-border bg-white p-6 shadow-[0_30px_80px_rgba(15,23,42,0.28)]">
+            <h2 className="m-0 text-lg font-extrabold text-text-primary">
+              {confirmAction.type === 'delete'
+                ? `Delete ${confirmAction.user.role === 'dealer' ? 'Dealer' : 'User'}`
+                : `${confirmAction.user.status === 'active' ? 'Block' : 'Activate'} ${confirmAction.user.role === 'dealer' ? 'Dealer' : 'User'}`}
+            </h2>
+            <p className="m-0 mt-2 text-sm text-text-secondary">
+              {confirmAction.type === 'delete'
+                ? `This will permanently remove ${confirmAction.user.name} from the portal.`
+                : confirmAction.user.status === 'active'
+                  ? `${confirmAction.user.name} will lose portal access until reactivated.`
+                  : `${confirmAction.user.name} will regain portal access immediately.`}
+            </p>
+            <div className="mt-4 rounded-xl border border-portal-border-sub bg-slate-50 px-4 py-3">
+              <div className="text-sm font-bold text-text-primary">{confirmAction.user.name}</div>
+              <div className="mt-1 text-xs text-text-muted">{confirmAction.user.email}</div>
+            </div>
+            <div className="mt-6 flex items-center justify-end gap-2.5">
+              <button
+                type="button"
+                onClick={() => setConfirmAction(null)}
+                disabled={isConfirmLoading}
+                className="portal-btn-ghost px-4 py-2.5 text-[13px] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmAction}
+                disabled={isConfirmLoading}
+                className={`rounded-[10px] px-4 py-2.5 text-[13px] font-bold text-white disabled:cursor-not-allowed disabled:opacity-60 ${
+                  confirmAction.type === 'delete'
+                    ? 'bg-red-600 hover:bg-red-700'
+                    : confirmAction.user.status === 'active'
+                      ? 'bg-red-600 hover:bg-red-700'
+                      : 'bg-emerald-600 hover:bg-emerald-700'
+                }`}
+              >
+                {isConfirmLoading
+                  ? 'Processing...'
+                  : confirmAction.type === 'delete'
+                    ? 'Delete User'
+                    : confirmAction.user.status === 'active'
+                      ? 'Block User'
+                      : 'Activate User'}
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body,
+      )}
     </div>
   );
 }
