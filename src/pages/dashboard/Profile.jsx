@@ -97,7 +97,7 @@ export default function Profile() {
     .join('') || 'PU';
 
   return (
-    <div className="portal-page animate-fade-in mx-auto w-full max-w-7xl">
+    <div className="portal-page animate-fade-in w-full">
       <div className="portal-page-header">
         <div>
           <h1 className="portal-page-title">My Profile</h1>

@@ -55,7 +55,7 @@ export default function CreateDealer() {
   };
 
   return (
-    <div className="mx-auto flex max-w-[1060px] flex-col gap-5.5 animate-fade-in">
+    <div className="flex flex-col gap-5.5 animate-fade-in">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <button

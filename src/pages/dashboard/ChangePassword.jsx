@@ -73,7 +73,7 @@ export default function ChangePassword() {
   const isPasswordValid = newPassword.length >= 6;
 
   return (
-    <div className="portal-page mx-auto max-w-3xl animate-fade-in">
+    <div className="portal-page animate-fade-in">
       
       {/* Back button */}
       <div>
