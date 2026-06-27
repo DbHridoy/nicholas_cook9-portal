@@ -1,9 +1,35 @@
 import React, { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Upload, Search, Eye, Plus, X, CheckCircle2, AlertCircle, DollarSign, User, Hash } from 'lucide-react';
+import { Upload, Search, Eye, Plus, X, CheckCircle2, AlertCircle, DollarSign, User, Hash, CalendarDays, FileText } from 'lucide-react';
 import { api } from '../../lib/api';
 
 const formatMoney = (value) => '$' + Number(value || 0).toLocaleString('en-US', { minimumFractionDigits: 2 });
+const formatDate = (value) => (value ? new Date(value).toLocaleDateString() : '-');
+
+const termLabel = {
+  '3_year_coverage': '3 Year Coverage',
+  '5_year_coverage': '5 Year Coverage',
+  'Preload 1 year': 'Preload 1 year',
+  'Preload 2 year': 'Preload 2 year',
+  WFO: 'WFO',
+  'Preload product only': 'Preload product only',
+};
+
+const productLabel = {
+  carpet: 'Carpet',
+  lvp_laminate: 'LVP / Laminate',
+  hardwood: 'Hardwood',
+  tile: 'Tile',
+};
+
+const termOptions = [
+  { value: '3_year_coverage', label: '3 Year Coverage' },
+  { value: '5_year_coverage', label: '5 Year Coverage' },
+  { value: 'Preload 1 year', label: 'Preload 1 year' },
+  { value: 'Preload 2 year', label: 'Preload 2 year' },
+  { value: 'WFO', label: 'WFO' },
+  { value: 'Preload product only', label: 'Preload product only' },
+];
 
 const parseSaleAmount = (value) => {
   const normalized = value.trim().replace(/[$,]/g, '');
@@ -12,13 +38,26 @@ const parseSaleAmount = (value) => {
   return Number(normalized);
 };
 
+const getContractStatus = (contract) => {
+  if (!contract?.expiry) return 'Active';
+
+  return new Date(contract.expiry).getTime() < Date.now() ? 'Expired' : 'Active';
+};
+
 const toContractRow = (contract) => ({
   id: contract._id,
   orderId: contract.orderId,
   customer: contract.name,
+  amountValue: Number(contract.price ?? 0),
   amount: formatMoney(contract.price),
-  status: 'Active',
-  source: contract.file?.startsWith('manual/') ? 'manual' : 'uploaded',
+  status: getContractStatus(contract),
+  coveredProduct: contract.coveredProduct,
+  term: contract.term,
+  file: contract.file,
+  propertyAddress: contract.propertyAddress,
+  saleDate: contract.saleDate,
+  expiry: contract.expiry,
+  createdAt: contract.createdAt,
 });
 
 const MAX_CONTRACT_FILE_SIZE = 25 * 1024 * 1024;
@@ -36,7 +75,7 @@ const emptyForm = {
   customer: '',
   amount: '',
   propertyAddress: '',
-  installationDate: '',
+  saleDate: '',
   coveredProduct: 'carpet',
   term: '3_year_coverage',
 };
@@ -47,9 +86,11 @@ export default function Contracts() {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [formError, setFormError] = useState('');
+  const [pageError, setPageError] = useState('');
   const [contractFile, setContractFile] = useState(null);
   const [successMsg, setSuccessMsg] = useState('');
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef();
 
   React.useEffect(() => {
@@ -59,7 +100,9 @@ export default function Contracts() {
       .then((data) => {
         if (active) setContracts(data.map(toContractRow));
       })
-      .catch((err) => setFormError(err instanceof Error ? err.message : 'Unable to load contracts.'))
+      .catch((err) => {
+        if (active) setPageError(err instanceof Error ? err.message : 'Unable to load contracts.');
+      })
       .finally(() => {
         if (active) setLoading(false);
       });
@@ -69,10 +112,12 @@ export default function Contracts() {
     };
   }, []);
 
-  console.log(contracts)
   const filtered = contracts.filter(c => {
     const q = search.toLowerCase();
-    return !q || c.id.toLowerCase().includes(q) || c.customer.toLowerCase().includes(q);
+    return !q
+      || c.orderId?.toLowerCase().includes(q)
+      || c.customer?.toLowerCase().includes(q)
+      || c.propertyAddress?.toLowerCase().includes(q);
   });
 
   const handleContractFileChange = (e) => {
@@ -96,7 +141,7 @@ export default function Contracts() {
   };
 
   const handleManualSubmit = async () => {
-    if (!form.orderId.trim() || !form.customer.trim() || !form.amount.trim() || !form.propertyAddress.trim() || !form.installationDate || !contractFile) {
+    if (!form.orderId.trim() || !form.customer.trim() || !form.amount.trim() || !form.propertyAddress.trim() || !form.saleDate || !contractFile) {
       setFormError('All fields are required.');
       return;
     }
@@ -108,11 +153,12 @@ export default function Contracts() {
     }
 
     try {
+      setIsSubmitting(true);
       const payload = new FormData();
       payload.append('orderId', form.orderId.trim());
       payload.append('name', form.customer.trim());
       payload.append('propertyAddress', form.propertyAddress.trim());
-      payload.append('installationDate', form.installationDate);
+      payload.append('saleDate', form.saleDate);
       payload.append('coveredProduct', form.coveredProduct);
       payload.append('term', form.term);
       payload.append('price', String(price));
@@ -128,6 +174,8 @@ export default function Contracts() {
       showSuccess('Contract added.');
     } catch (err) {
       setFormError(err instanceof Error ? err.message : 'Unable to create contract.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -136,7 +184,7 @@ export default function Contracts() {
     setTimeout(() => setSuccessMsg(''), 4000);
   };
 
-  const statusColor = (s) => s === 'Active' ? 'badge-resolved' : 'badge-pending';
+  const statusColor = (s) => s === 'Active' ? 'badge-resolved' : 'badge-unresolved';
 
   return (
     <div className="flex flex-col gap-5.5 animate-fade-in">
@@ -160,6 +208,12 @@ export default function Contracts() {
       {successMsg && (
         <div className="flex items-center gap-2 rounded-[9px] border border-emerald-500/25 bg-emerald-500/10 px-4 py-2.5 text-[13px] font-medium text-emerald-500">
           <CheckCircle2 size={15} /> {successMsg}
+        </div>
+      )}
+
+      {pageError && (
+        <div className="flex items-center gap-2 rounded-[9px] border border-red-600/20 bg-red-600/10 px-4 py-2.5 text-[13px] text-red-600">
+          <AlertCircle size={15} /> {pageError}
         </div>
       )}
 
@@ -231,12 +285,12 @@ export default function Contracts() {
             </div>
             <div>
               <label className="mb-1.75 flex items-center gap-1.25 text-[11px] font-semibold uppercase tracking-[0.06em] text-text-muted">
-                Installation Date
+                <CalendarDays size={10} /> Sale Date
               </label>
               <input
                 type="date"
-                value={form.installationDate}
-                onChange={e => setForm(p => ({ ...p, installationDate: e.target.value }))}
+                value={form.saleDate}
+                onChange={e => setForm(p => ({ ...p, saleDate: e.target.value }))}
                 className="portal-input w-full px-3 py-2.25 text-[13px]"
               />
             </div>
@@ -249,10 +303,9 @@ export default function Contracts() {
                 onChange={e => setForm(p => ({ ...p, coveredProduct: e.target.value }))}
                 className="portal-input w-full px-3 py-2.25 text-[13px]"
               >
-                <option value="carpet">Carpet</option>
-                <option value="lvp_laminate">LVP / Laminate</option>
-                <option value="hardwood">Hardwood</option>
-                <option value="tile">Tile</option>
+                {Object.entries(productLabel).map(([value, label]) => (
+                  <option key={value} value={value}>{label}</option>
+                ))}
               </select>
             </div>
             <div>
@@ -264,8 +317,9 @@ export default function Contracts() {
                 onChange={e => setForm(p => ({ ...p, term: e.target.value }))}
                 className="portal-input w-full px-3 py-2.25 text-[13px]"
               >
-                <option value="3_year_coverage">3 Year Coverage</option>
-                <option value="5_year_coverage">5 Year Coverage</option>
+                {termOptions.map((option) => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
               </select>
             </div>
             <div>
@@ -286,8 +340,12 @@ export default function Contracts() {
           </div>
 
           <div className="flex gap-2.5">
-            <button onClick={handleManualSubmit} className="portal-btn-primary flex items-center gap-1.75 px-5 py-2.25 text-[13px]">
-              Save
+            <button
+              onClick={handleManualSubmit}
+              disabled={isSubmitting}
+              className="portal-btn-primary flex items-center gap-1.75 px-5 py-2.25 text-[13px] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isSubmitting ? 'Saving...' : 'Save'}
             </button>
             <button onClick={() => { setShowForm(false); setForm(emptyForm); setContractFile(null); setFormError(''); if (fileInputRef.current) fileInputRef.current.value = ''; }} className="portal-btn-ghost px-4 py-2.25 text-[13px]">
               Cancel
@@ -320,9 +378,9 @@ export default function Contracts() {
               <tr>
                 <th>Order ID</th>
                 <th>Customer</th>
+                <th>Sale Date</th>
                 <th>Sale Amount</th>
                 <th>Status</th>
-                {/* <th>Source</th> */}
                 <th className="text-right">Actions</th>
               </tr>
             </thead>
@@ -338,22 +396,39 @@ export default function Contracts() {
                     </span>
                   </td>
                   <td>{contract.customer}</td>
+                  <td>
+                    <div className="text-[13px] text-text-primary">{formatDate(contract.saleDate)}</div>
+                    <div className="text-[11px] text-text-muted">{termLabel[contract.term] ?? contract.term}</div>
+                  </td>
                   <td className="font-semibold text-emerald-600">{contract.amount}</td>
                   <td><span className={statusColor(contract.status)}>{contract.status}</span></td>
-                  {/* <td>
-                    <span className="inline-flex items-center gap-1.25 text-[11px] text-text-muted">
-                      {contract.source === 'uploaded' ? <><FileText size={11} /> PDF</> : <><Plus size={11} /> Manual</>}
-                    </span>
-                  </td> */}
                   <td className="text-right">
-                    <Link to={`/dashboard/sales/${contract.id}`} className="inline-flex items-center gap-1.25 rounded-[7px] border border-accent-blue/20 bg-accent-blue/10 px-2.5 py-1.5 text-xs font-medium text-accent-blue no-underline">
-                      <Eye size={13} /> View
-                    </Link>
+                    <div className="flex items-center justify-end gap-2">
+                      {contract.file && (
+                        <a
+                          href={contract.file}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1.25 rounded-[7px] border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs font-medium text-text-secondary no-underline"
+                        >
+                          <FileText size={13} /> File
+                        </a>
+                      )}
+                      <Link to={`/dashboard/sales/${contract.id}`} className="inline-flex items-center gap-1.25 rounded-[7px] border border-accent-blue/20 bg-accent-blue/10 px-2.5 py-1.5 text-xs font-medium text-accent-blue no-underline">
+                        <Eye size={13} /> View
+                      </Link>
+                    </div>
                   </td>
                 </tr>
               ))}
               {!loading && filtered.length === 0 && (
-                <tr><td colSpan={6} className="px-5 py-10 text-center text-text-muted">No contracts found.</td></tr>
+                <tr>
+                  <td colSpan={6} className="px-5 py-10 text-center text-text-muted">
+                    {contracts.length === 0
+                      ? 'No contracts have been uploaded for this dealer yet.'
+                      : 'No contracts found matching your search.'}
+                  </td>
+                </tr>
               )}
             </tbody>
           </table>

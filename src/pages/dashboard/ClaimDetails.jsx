@@ -44,35 +44,35 @@ export default function ClaimDetails() {
   }, [id]);
 
   if (loading) {
-    return <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">Loading claim...</div>;
+    return <div className="portal-card p-6">Loading claim...</div>;
   }
 
   if (!claim) {
-    return <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-red-600">{error || 'Claim not found.'}</div>;
+    return <div className="portal-card p-6 text-red-600">{error || 'Claim not found.'}</div>;
   }
 
   const attachments = Array.isArray(claim.attachments) ? claim.attachments : [];
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
-      <div className="flex items-center gap-4">
-        <Link to="/dashboard/reports" className="p-2 bg-white border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-50 transition-colors">
+    <div className="flex flex-col gap-6 animate-fade-in">
+      <div className="flex flex-wrap items-center gap-4">
+        <Link to="/dashboard/reports" className="rounded-lg border border-gray-200 bg-white p-2 text-gray-500 transition-colors hover:bg-gray-50">
           <ArrowLeft className="h-5 w-5" />
         </Link>
-        <div>
+        <div className="min-w-0 flex-1">
           <h1 className="text-2xl font-bold text-[#111827]">Claim {claim.claimId ?? claim._id}</h1>
           <p className="text-sm text-gray-500 mt-1">Submitted on {formatDate(claim.createdAt)}</p>
         </div>
-        <div className="ml-auto flex items-center gap-3">
+        <div className="flex items-center gap-3">
           <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${statusClass[claim.status] ?? statusClass.pending}`}>
             {statusLabel[claim.status] ?? claim.status}
           </span>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1 space-y-6">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+      <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(320px,0.9fr)_minmax(0,1.6fr)]">
+        <div className="space-y-6">
+          <div className="portal-card p-6">
             <div className="flex items-center gap-2 mb-4">
               <User className="h-5 w-5 text-gray-400" />
               <h2 className="text-lg font-bold text-[#111827]">Customer</h2>
@@ -93,7 +93,7 @@ export default function ClaimDetails() {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <div className="portal-card p-6">
             <div className="flex items-center gap-2 mb-4">
               <Package className="h-5 w-5 text-gray-400" />
               <h2 className="text-lg font-bold text-[#111827]">Product Issue</h2>
@@ -102,8 +102,8 @@ export default function ClaimDetails() {
           </div>
         </div>
 
-        <div className="lg:col-span-2">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+        <div>
+          <div className="portal-card overflow-hidden">
             <div className="p-6 border-b border-gray-100 flex items-center gap-2">
               <MessageSquare className="h-5 w-5 text-gray-400" />
               <h2 className="text-lg font-bold text-[#111827]">Claim Reason / Message</h2>
@@ -120,7 +120,7 @@ export default function ClaimDetails() {
           </div>
 
           {attachments.length > 0 && (
-            <div className="mt-6 bg-white rounded-xl shadow-sm border border-gray-100">
+            <div className="portal-card mt-6 overflow-hidden">
               <div className="p-6 border-b border-gray-100 flex items-center gap-2">
                 <ImageIcon className="h-5 w-5 text-gray-400" />
                 <h2 className="text-lg font-bold text-[#111827]">Claim Photos</h2>

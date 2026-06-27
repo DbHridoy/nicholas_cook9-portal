@@ -38,15 +38,15 @@ export default function ComplaintDetails() {
   const claim = complaintData[id] || complaintData['CLM-8092']; // Fallback for demo
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
-      <div className="flex items-center gap-4">
+    <div className="flex flex-col gap-6 animate-fade-in">
+      <div className="flex flex-wrap items-center gap-4">
         <button
           onClick={() => navigate('/dashboard/complaints')}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          className="rounded-lg p-2 transition-colors hover:bg-gray-100"
         >
           <ArrowLeft className="h-5 w-5 text-gray-500" />
         </button>
-        <div className="flex-1">
+        <div className="min-w-0 flex-1">
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold text-[#111827]">{id}</h1>
             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
@@ -59,10 +59,10 @@ export default function ComplaintDetails() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,1.6fr)_320px]">
         {/* Core Info */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-6">
+        <div className="space-y-6">
+          <div className="portal-card p-6 space-y-6">
             <div>
               <h2 className="text-lg font-bold text-[#111827] mb-4">Claim Description</h2>
               <div className="p-4 bg-gray-50 rounded-lg border border-gray-100 text-sm text-gray-700 leading-relaxed">
@@ -80,7 +80,7 @@ export default function ComplaintDetails() {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <div className="portal-card p-6">
             <h2 className="text-lg font-bold text-[#111827] mb-6">Activity Timeline</h2>
             <div className="space-y-6">
               {claim.history.map((item, index) => (
@@ -105,7 +105,7 @@ export default function ComplaintDetails() {
 
         {/* Sidebar Info */}
         <div className="space-y-6">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-6">
+          <div className="portal-card p-6 space-y-6">
             <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Entity Details</h2>
             
             <div className="flex items-start gap-3">

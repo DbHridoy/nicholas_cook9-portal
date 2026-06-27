@@ -71,7 +71,7 @@ export default function AdminClaimDetails() {
   const attachments = Array.isArray(claim.attachments) ? claim.attachments : [];
 
   return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-5 animate-fade-in">
+    <div className="flex flex-col gap-5 animate-fade-in">
       <div className="flex items-center gap-3">
         <button
           onClick={() => navigate('/dashboard/complaints')}
@@ -94,7 +94,7 @@ export default function AdminClaimDetails() {
         </div>
       )}
 
-      <div className="grid items-start gap-4 lg:grid-cols-[1fr_260px]">
+      <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1.6fr)_320px]">
         <div className="flex flex-col gap-4">
           <div className="portal-card p-5.5">
             <h2 className="mb-3.5 text-sm font-bold text-text-primary">Claim Description</h2>

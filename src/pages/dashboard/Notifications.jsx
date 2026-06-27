@@ -123,7 +123,7 @@ export default function Notifications() {
   };
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-6 animate-fade-in">
+    <div className="flex flex-col gap-6 animate-fade-in">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="mb-1 text-[11px] font-extrabold uppercase tracking-[0.12em] text-text-muted">Inbox</p>
