@@ -219,6 +219,12 @@ export const api = {
     return request(`/contracts/${id}`).then((body) => body.data.contract);
   },
 
+  deleteContract(id) {
+    return request(`/contracts/${id}`, {
+      method: 'DELETE',
+    });
+  },
+
   listDailyStats() {
     return request('/daily-stats').then((body) => body.data.dailyStats);
   },

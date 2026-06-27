@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Upload, Search, Eye, Plus, X, CheckCircle2, AlertCircle, DollarSign, User, Hash, CalendarDays, FileText } from 'lucide-react';
+import { Upload, Search, Eye, Plus, X, CheckCircle2, AlertCircle, DollarSign, User, Hash, CalendarDays, FileText, Trash2 } from 'lucide-react';
 import { api } from '../../lib/api';
 
 const formatMoney = (value) => '$' + Number(value || 0).toLocaleString('en-US', { minimumFractionDigits: 2 });
@@ -176,6 +176,21 @@ export default function Contracts() {
       setFormError(err instanceof Error ? err.message : 'Unable to create contract.');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteContract = async (contractId) => {
+    if (!window.confirm('Are you sure you want to delete this contract?')) {
+      return;
+    }
+
+    try {
+      await api.deleteContract(contractId);
+      setContracts((prev) => prev.filter((contract) => contract.id !== contractId));
+      setPageError('');
+      showSuccess('Contract deleted.');
+    } catch (err) {
+      setPageError(err instanceof Error ? err.message : 'Unable to delete contract.');
     }
   };
 
@@ -417,6 +432,12 @@ export default function Contracts() {
                       <Link to={`/dashboard/sales/${contract.id}`} className="inline-flex items-center gap-1.25 rounded-[7px] border border-accent-blue/20 bg-accent-blue/10 px-2.5 py-1.5 text-xs font-medium text-accent-blue no-underline">
                         <Eye size={13} /> View
                       </Link>
+                      <button
+                        onClick={() => handleDeleteContract(contract.id)}
+                        className="inline-flex items-center gap-1.25 rounded-[7px] border border-red-500/20 bg-red-500/10 px-2.5 py-1.5 text-xs font-medium text-red-500"
+                      >
+                        <Trash2 size={13} /> Delete
+                      </button>
                     </div>
                   </td>
                 </tr>
