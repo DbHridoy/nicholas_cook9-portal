@@ -108,12 +108,14 @@ export default function DashboardLayout() {
   const renderSidebarContent = () => (
     <div className="flex h-full flex-col">
       {/* Logo */}
-      <div className="flex h-[68px] shrink-0 items-center justify-between border-b border-white/10 px-5">
-        <img
-          src="/ledger-logo.svg"
-          alt="Ledger logo"
-          className="brightness-0 invert"
-        />
+      <div className="flex h-[88px] shrink-0 items-center justify-between border-b border-white/10 px-5">
+        <div className="flex flex-1 justify-center md:justify-start">
+          <img
+            src="/ledger-logo-white.svg"
+            alt="Ledger Group"
+            className="h-[52px] w-auto shrink-0 object-contain"
+          />
+        </div>
         {/* Mobile close */}
         <button
           onClick={() => setMobileOpen(false)}

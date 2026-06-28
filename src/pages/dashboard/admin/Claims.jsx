@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Filter, Eye, MoreVertical, MessageSquare } from 'lucide-react';
+import { Search, Filter, Eye, MessageSquare } from 'lucide-react';
 import { api } from '../../../lib/api';
 
 const statusLabel = {
@@ -24,6 +24,7 @@ export default function Claims() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
+  const [updatingClaimId, setUpdatingClaimId] = useState(null);
 
   useEffect(() => {
     let active = true;
@@ -55,6 +56,22 @@ export default function Claims() {
     const matchStatus = statusFilter === 'all' || claim.status === statusFilter;
     return matchSearch && matchStatus;
   }), [claims, search, statusFilter]);
+
+  const handleUpdateStatus = async (claimId, status) => {
+    setError('');
+    setUpdatingClaimId(claimId);
+
+    try {
+      const updated = await api.updateClaimStatus(claimId, status);
+      setClaims((prev) => prev.map((claim) => (
+        claim._id === claimId ? updated : claim
+      )));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to update claim status.');
+    } finally {
+      setUpdatingClaimId(null);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-6 animate-fade-in">
@@ -147,15 +164,26 @@ export default function Claims() {
                   </td>
                   <td>{formatDate(item.createdAt)}</td>
                   <td className="text-right">
-                    <div className="flex items-center justify-end gap-1">
+                    <div className="flex items-center justify-end gap-1.5">
                       <button
                         onClick={() => navigate(`/dashboard/complaints/${item._id}`)}
                         className="flex cursor-pointer items-center gap-1.25 rounded-[7px] border border-accent-blue/20 bg-accent-blue/10 px-2.5 py-1.5 text-xs font-medium text-accent-blue"
                       >
                         <Eye size={13} /> View
                       </button>
-                      <button className="cursor-pointer rounded-md border-0 bg-transparent p-1.5 text-text-muted">
-                        <MoreVertical size={14} />
+                      <button
+                        onClick={() => handleUpdateStatus(item._id, 'approved')}
+                        disabled={updatingClaimId === item._id || item.status === 'approved'}
+                        className="rounded-[7px] border border-emerald-600/20 bg-emerald-600/10 px-2.5 py-1.5 text-xs font-medium text-emerald-600 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {updatingClaimId === item._id && item.status !== 'approved' ? 'Saving...' : 'Approve'}
+                      </button>
+                      <button
+                        onClick={() => handleUpdateStatus(item._id, 'denied')}
+                        disabled={updatingClaimId === item._id || item.status === 'denied'}
+                        className="rounded-[7px] border border-red-600/20 bg-red-600/10 px-2.5 py-1.5 text-xs font-medium text-red-600 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {updatingClaimId === item._id && item.status !== 'denied' ? 'Saving...' : 'Deny'}
                       </button>
                     </div>
                   </td>

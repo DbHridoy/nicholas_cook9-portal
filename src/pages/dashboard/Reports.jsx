@@ -22,6 +22,7 @@ export default function Reports() {
   const [search, setSearch] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
+  const [updatingClaimId, setUpdatingClaimId] = useState(null);
 
   useEffect(() => {
     let active = true;
@@ -51,6 +52,22 @@ export default function Reports() {
       || claim.email?.toLowerCase().includes(q)
       || claim.orderId?.toLowerCase().includes(q);
   }), [claims, search]);
+
+  const handleUpdateStatus = async (claimId, status) => {
+    setError('');
+    setUpdatingClaimId(claimId);
+
+    try {
+      const updated = await api.updateClaimStatus(claimId, status);
+      setClaims((prev) => prev.map((claim) => (
+        claim._id === claimId ? updated : claim
+      )));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to update claim status.');
+    } finally {
+      setUpdatingClaimId(null);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -106,9 +123,29 @@ export default function Reports() {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <Link to={`/dashboard/reports/${claim._id}`} className="inline-flex p-1 text-gray-400 hover:text-blue-600 transition-colors" title="View Details">
-                      <Eye className="h-4 w-4" />
-                    </Link>
+                    <div className="flex items-center justify-end gap-1.5">
+                      <Link
+                        to={`/dashboard/reports/${claim._id}`}
+                        className="inline-flex items-center gap-1.25 rounded-[7px] border border-accent-blue/20 bg-accent-blue/10 px-2.5 py-1.5 text-xs font-medium text-accent-blue no-underline"
+                        title="View Details"
+                      >
+                        <Eye className="h-4 w-4" /> View
+                      </Link>
+                      <button
+                        onClick={() => handleUpdateStatus(claim._id, 'approved')}
+                        disabled={updatingClaimId === claim._id || claim.status === 'approved'}
+                        className="rounded-[7px] border border-emerald-600/20 bg-emerald-600/10 px-2.5 py-1.5 text-xs font-medium text-emerald-600 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {updatingClaimId === claim._id && claim.status !== 'approved' ? 'Saving...' : 'Approve'}
+                      </button>
+                      <button
+                        onClick={() => handleUpdateStatus(claim._id, 'denied')}
+                        disabled={updatingClaimId === claim._id || claim.status === 'denied'}
+                        className="rounded-[7px] border border-red-600/20 bg-red-600/10 px-2.5 py-1.5 text-xs font-medium text-red-600 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {updatingClaimId === claim._id && claim.status !== 'denied' ? 'Saving...' : 'Deny'}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

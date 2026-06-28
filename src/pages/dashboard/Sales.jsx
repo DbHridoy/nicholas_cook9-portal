@@ -141,7 +141,7 @@ export default function Contracts() {
   };
 
   const handleManualSubmit = async () => {
-    if (!form.orderId.trim() || !form.customer.trim() || !form.amount.trim() || !form.propertyAddress.trim() || !form.saleDate || !contractFile) {
+    if (!form.orderId.trim() || !form.customer.trim() || !form.amount.trim() || !form.propertyAddress.trim() || !form.saleDate) {
       setFormError('All fields are required.');
       return;
     }
@@ -162,7 +162,9 @@ export default function Contracts() {
       payload.append('coveredProduct', form.coveredProduct);
       payload.append('term', form.term);
       payload.append('price', String(price));
-      payload.append('file', contractFile);
+      if (contractFile) {
+        payload.append('file', contractFile);
+      }
 
       const created = await api.createContract(payload);
       setContracts(prev => [toContractRow(created), ...prev]);
@@ -339,7 +341,7 @@ export default function Contracts() {
             </div>
             <div>
               <label className="mb-1.75 flex items-center gap-1.25 text-[11px] font-semibold uppercase tracking-[0.06em] text-text-muted">
-                <Upload size={10} /> Contract File
+                <Upload size={10} /> Contract File (Optional)
               </label>
               <input
                 ref={fileInputRef}
@@ -349,7 +351,7 @@ export default function Contracts() {
                 className="portal-input w-full px-3 py-2 text-[13px]"
               />
               <p className="m-0 mt-1.5 text-[11px] text-text-muted">
-                {contractFile ? `${contractFile.name} (${(contractFile.size / 1024).toFixed(1)} KB)` : 'PDF, Word, JPG, PNG, or WebP. Max 25 MB.'}
+                {contractFile ? `${contractFile.name} (${(contractFile.size / 1024).toFixed(1)} KB)` : 'PDF, Word, JPG, PNG, or WebP. Optional. Max 25 MB.'}
               </p>
             </div>
           </div>

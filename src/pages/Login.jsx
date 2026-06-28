@@ -33,7 +33,11 @@ export default function Login() {
   return (
     <div className="auth-shell">
       <div className="w-full max-w-md">
-        <img src="/ledger-logo.svg" alt="Ledger logo" />
+        <img
+          src="/ledger-logo.svg"
+          alt="Ledger Group"
+          className="mx-auto mb-7 h-auto w-[320px] max-w-full object-contain"
+        />
         
         <div className="auth-card">
           <form className="space-y-6" onSubmit={handleLogin}>

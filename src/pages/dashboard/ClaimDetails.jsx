@@ -23,6 +23,7 @@ export default function ClaimDetails() {
   const [claim, setClaim] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -42,6 +43,20 @@ export default function ClaimDetails() {
       active = false;
     };
   }, [id]);
+
+  const updateStatus = async (status) => {
+    setUpdating(true);
+    setError('');
+
+    try {
+      const updated = await api.updateClaimStatus(id, status);
+      setClaim(updated);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to update claim status.');
+    } finally {
+      setUpdating(false);
+    }
+  };
 
   if (loading) {
     return <div className="portal-card p-6">Loading claim...</div>;
@@ -69,6 +84,12 @@ export default function ClaimDetails() {
           </span>
         </div>
       </div>
+
+      {error && (
+        <div className="rounded-lg border border-red-600/20 bg-red-600/10 px-3.5 py-2.5 text-[13px] text-red-600">
+          {error}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(320px,0.9fr)_minmax(0,1.6fr)]">
         <div className="space-y-6">
@@ -99,6 +120,26 @@ export default function ClaimDetails() {
               <h2 className="text-lg font-bold text-[#111827]">Product Issue</h2>
             </div>
             <p className="text-sm font-medium text-[#111827]">{claim.flooringType}</p>
+          </div>
+
+          <div className="portal-card p-6">
+            <h2 className="mb-4 text-lg font-bold text-[#111827]">Claim Action</h2>
+            <div className="flex flex-wrap gap-2.5">
+              <button
+                disabled={updating || claim.status === 'approved'}
+                onClick={() => updateStatus('approved')}
+                className="rounded-[9px] bg-emerald-600 px-4 py-2.5 text-[13px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {updating && claim.status !== 'approved' ? 'Saving...' : 'Approve'}
+              </button>
+              <button
+                disabled={updating || claim.status === 'denied'}
+                onClick={() => updateStatus('denied')}
+                className="rounded-[9px] border border-red-600/20 bg-red-600/10 px-4 py-2.5 text-[13px] font-semibold text-red-600 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {updating && claim.status !== 'denied' ? 'Saving...' : 'Deny'}
+              </button>
+            </div>
           </div>
         </div>
 
