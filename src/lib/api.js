@@ -275,4 +275,21 @@ export const api = {
       method: 'PATCH',
     }).then((body) => body.data);
   },
+
+  listCancellations() {
+    return request('/cancellations').then((body) => body.data.cancellations);
+  },
+
+  createCancellation(payload) {
+    return request('/cancellations', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }).then((body) => body.data.cancellation);
+  },
+
+  processCancellation(id) {
+    return request(`/cancellations/${id}/process`, {
+      method: 'PATCH',
+    }).then((body) => body.data.cancellation);
+  },
 };

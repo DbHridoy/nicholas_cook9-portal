@@ -3,7 +3,7 @@ import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, FileText, LogOut, User,
   Menu, TrendingUp, MessageSquare, X,
-  FileCheck, Bell, ChevronDown,
+  FileCheck, Bell, ChevronDown, ReceiptText,
 } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout, setUser } from '../store/authSlice';
@@ -92,6 +92,7 @@ export default function DashboardLayout() {
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, exact: true },
     { name: 'Contracts', path: '/dashboard/sales', icon: FileCheck },
     { name: 'Daily Sales', path: '/dashboard/daily-sales', icon: TrendingUp },
+    { name: 'Cancellations', path: '/dashboard/cancellations', icon: ReceiptText },
     // { name: 'Products', path: '/dashboard/products', icon: Package },
     { name: 'Claims', path: '/dashboard/reports', icon: FileText },
   ];

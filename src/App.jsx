@@ -20,6 +20,7 @@ import Reports from './pages/dashboard/Reports';
 import ClaimDetails from './pages/dashboard/ClaimDetails';
 import Products from './pages/dashboard/Products';
 import DailySales from './pages/dashboard/DailySales';
+import Cancellations from './pages/dashboard/Cancellations';
 
 // Admin pages
 import DealerList from './pages/dashboard/admin/DealerList';
@@ -73,6 +74,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute role="dealer">
             <DailySales />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'cancellations',
+        element: (
+          <ProtectedRoute role="dealer">
+            <Cancellations />
           </ProtectedRoute>
         ),
       },
