@@ -21,7 +21,16 @@ const termLabel = {
 
 const formatMoney = (value) => `$${Number(value || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
 const formatDate = (value) => (value ? new Date(value).toLocaleDateString() : '-');
-const getContractStatus = (value) => (value?.expiry && new Date(value.expiry).getTime() < Date.now() ? 'Expired' : 'Active');
+const getContractStatus = (value) => {
+  if (value?.status === 'cancelled') return 'Cancelled';
+  return value?.expiry && new Date(value.expiry).getTime() < Date.now() ? 'Expired' : 'Active';
+};
+
+const statusClassName = (status) => {
+  if (status === 'Active') return 'bg-green-100 text-green-800';
+  if (status === 'Cancelled') return 'bg-slate-200 text-slate-700';
+  return 'bg-red-100 text-red-700';
+};
 
 export default function SalesDetails() {
   const { id } = useParams();
@@ -69,7 +78,7 @@ export default function SalesDetails() {
           <h1 className="truncate text-2xl font-bold text-[#111827]">{contract.orderId || `Contract ${contract._id}`}</h1>
           <p className="mt-1 text-sm text-gray-500">Created on {formatDate(contract.createdAt)}</p>
         </div>
-        <span className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ${status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-700'}`}>
+        <span className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ${statusClassName(status)}`}>
           {status}
         </span>
       </div>
