@@ -4,6 +4,9 @@ import {
   Calculator,
   CheckCircle2,
   DollarSign,
+  FileText,
+  Hash,
+  Home,
   Plus,
   ReceiptText,
   RotateCcw,
@@ -35,8 +38,73 @@ const calculateRefundPreview = (purchasePrice, remainingMonths, originalMonths) 
 
 const formatDateTime = (value) => value ? new Date(value).toLocaleString() : '—';
 
+const contractTermMonths = {
+  '3_year_coverage': 36,
+  '5_year_coverage': 60,
+  'Preload 1 year': 12,
+  'Preload 2 year': 24,
+  WFO: 0,
+  'Preload product only': 0,
+};
+
+const coveredProductLabel = {
+  carpet: 'Carpet',
+  lvp_laminate: 'LVP / Laminate',
+  hardwood: 'Hardwood',
+  tile: 'Tile',
+};
+
+const differenceInMonths = (startDate, endDate) => {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+    return 0;
+  }
+
+  return Math.max(
+    0,
+    (end.getUTCFullYear() - start.getUTCFullYear()) * 12
+      + (end.getUTCMonth() - start.getUTCMonth()),
+  );
+};
+
+const getOriginalCoverageMonths = (contract) => {
+  const termMonths = contractTermMonths[contract.term];
+
+  if (typeof termMonths === 'number' && termMonths > 0) {
+    return termMonths;
+  }
+
+  return differenceInMonths(contract.saleDate, contract.expiry);
+};
+
+const getRemainingCoverageMonths = (contract) => {
+  const remaining = differenceInMonths(new Date(), contract.expiry);
+  const original = getOriginalCoverageMonths(contract);
+
+  if (original <= 0) {
+    return 0;
+  }
+
+  return Math.min(remaining, original);
+};
+
+const toContractOption = (contract) => ({
+  id: contract._id,
+  orderId: contract.orderId,
+  customerName: contract.name,
+  propertyAddress: contract.propertyAddress,
+  coveredProduct: contract.coveredProduct,
+  coveredProductLabel: coveredProductLabel[contract.coveredProduct] ?? contract.coveredProduct,
+  originalPurchasePrice: Number(contract.price ?? 0),
+  originalCoverageMonths: getOriginalCoverageMonths(contract),
+  remainingCoverageMonths: getRemainingCoverageMonths(contract),
+});
+
 export default function Cancellations() {
   const [cancellations, setCancellations] = useState([]);
+  const [contracts, setContracts] = useState([]);
   const [search, setSearch] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -44,13 +112,20 @@ export default function Cancellations() {
   const [formError, setFormError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [processingId, setProcessingId] = useState(null);
+  const [confirmingCancellation, setConfirmingCancellation] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
+    contractId: '',
     customerName: '',
     originalPurchasePrice: '',
     remainingCoverageMonths: '',
     originalCoverageMonths: '',
   });
+
+  const selectedContract = useMemo(
+    () => contracts.find((contract) => contract.id === form.contractId) ?? null,
+    [contracts, form.contractId],
+  );
 
   const refundPreview = useMemo(
     () =>
@@ -70,10 +145,11 @@ export default function Cancellations() {
   useEffect(() => {
     let active = true;
 
-    api.listCancellations()
-      .then((data) => {
+    Promise.all([api.listCancellations(), api.listContracts()])
+      .then(([cancellationData, contractData]) => {
         if (active) {
-          setCancellations(data ?? []);
+          setCancellations(cancellationData ?? []);
+          setContracts((contractData ?? []).map(toContractOption));
           setPageError('');
         }
       })
@@ -110,11 +186,33 @@ export default function Cancellations() {
 
   const resetForm = () => {
     setForm({
+      contractId: '',
       customerName: '',
       originalPurchasePrice: '',
       remainingCoverageMonths: '',
       originalCoverageMonths: '',
     });
+  };
+
+  const handleContractSelect = (contractId) => {
+    const contract = contracts.find((entry) => entry.id === contractId);
+
+    if (!contract) {
+      setForm((current) => ({
+        ...current,
+        contractId: '',
+      }));
+      return;
+    }
+
+    setForm({
+      contractId: contract.id,
+      customerName: contract.customerName,
+      originalPurchasePrice: String(contract.originalPurchasePrice),
+      remainingCoverageMonths: String(contract.remainingCoverageMonths),
+      originalCoverageMonths: String(contract.originalCoverageMonths),
+    });
+    setFormError('');
   };
 
   const handleCreateCancellation = async (event) => {
@@ -127,6 +225,11 @@ export default function Cancellations() {
 
     if (!form.customerName.trim()) {
       setFormError('Customer name is required.');
+      return;
+    }
+
+    if (!form.contractId) {
+      setFormError('Please select a contract for this cancellation.');
       return;
     }
 
@@ -154,6 +257,7 @@ export default function Cancellations() {
 
     try {
       const cancellation = await api.createCancellation({
+        contractId: form.contractId,
         customerName: form.customerName.trim(),
         originalPurchasePrice,
         remainingCoverageMonths,
@@ -172,14 +276,6 @@ export default function Cancellations() {
   };
 
   const handleProcessCancellation = async (cancellation) => {
-    const confirmed = window.confirm(
-      `Are you sure you want to process the refund for ${cancellation.customerName}?`,
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
     setProcessingId(cancellation._id);
     setPageError('');
 
@@ -188,6 +284,7 @@ export default function Cancellations() {
       setCancellations((prev) =>
         prev.map((entry) => (entry._id === processed._id ? processed : entry)),
       );
+      setConfirmingCancellation(null);
       showSuccess('Cancellation refund processed successfully.');
     } catch (err) {
       setPageError(err instanceof Error ? err.message : 'Unable to process cancellation refund.');
@@ -197,8 +294,68 @@ export default function Cancellations() {
   };
 
   return (
-    <div className="portal-page animate-fade-in">
-      <div className="portal-page-header">
+    <>
+      {confirmingCancellation && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 px-4 backdrop-blur-[2px]">
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_24px_80px_rgba(15,23,42,0.28)]">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-lg font-bold text-text-primary">Process Cancellation</h2>
+                <p className="mt-1 text-sm text-text-muted">
+                  Confirm that you want to finalize this refund.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setConfirmingCancellation(null)}
+                disabled={processingId === confirmingCancellation._id}
+                className="rounded-full border-0 bg-transparent p-1 text-text-muted transition hover:bg-slate-100 hover:text-text-primary disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+              <div className="text-sm font-semibold text-text-primary">
+                {confirmingCancellation.customerName}
+              </div>
+              <div className="mt-1 text-sm text-text-secondary">
+                Refund Amount: {formatCurrency(confirmingCancellation.refundAmount)}
+              </div>
+            </div>
+
+            <p className="mt-4 text-sm leading-6 text-text-secondary">
+              Are you sure you want to process the refund for{' '}
+              <span className="font-semibold text-text-primary">
+                {confirmingCancellation.customerName}
+              </span>
+              ?
+            </p>
+
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setConfirmingCancellation(null)}
+                disabled={processingId === confirmingCancellation._id}
+                className="rounded-[10px] border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => handleProcessCancellation(confirmingCancellation)}
+                disabled={processingId === confirmingCancellation._id}
+                className="portal-btn-primary px-4 py-2.5 text-sm disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                {processingId === confirmingCancellation._id ? 'Processing...' : 'Process Refund'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="portal-page animate-fade-in">
+        <div className="portal-page-header">
         <div>
           <h1 className="portal-page-title">Cancellations</h1>
           <p className="portal-page-subtitle">
@@ -217,25 +374,25 @@ export default function Cancellations() {
         </button>
       </div>
 
-      {successMsg && (
-        <div className="flex items-center gap-2 rounded-[9px] border border-emerald-500/25 bg-emerald-500/10 px-4 py-2.5 text-[13px] font-medium text-emerald-500">
-          <CheckCircle2 size={15} /> {successMsg}
-        </div>
-      )}
+        {successMsg && (
+          <div className="flex items-center gap-2 rounded-[9px] border border-emerald-500/25 bg-emerald-500/10 px-4 py-2.5 text-[13px] font-medium text-emerald-500">
+            <CheckCircle2 size={15} /> {successMsg}
+          </div>
+        )}
 
-      {pageError && (
-        <div className="flex items-center gap-2 rounded-[9px] border border-red-600/20 bg-red-600/10 px-4 py-2.5 text-[13px] text-red-600">
-          <AlertCircle size={15} /> {pageError}
-        </div>
-      )}
+        {pageError && (
+          <div className="flex items-center gap-2 rounded-[9px] border border-red-600/20 bg-red-600/10 px-4 py-2.5 text-[13px] text-red-600">
+            <AlertCircle size={15} /> {pageError}
+          </div>
+        )}
 
-      {showForm && (
-        <div className="portal-card p-5.5 animate-fade-in">
+        {showForm && (
+          <div className="portal-card p-5.5 animate-fade-in">
           <div className="mb-[18px] flex items-center justify-between">
             <div>
               <h2 className="m-0 text-sm font-bold text-text-primary">Create Cancellation Quote</h2>
               <p className="mt-1 text-xs text-text-muted">
-                Refund amount is calculated automatically from the entered coverage values.
+                Select an existing contract to auto-fill values, or adjust the fields before saving.
               </p>
             </div>
             <button
@@ -256,6 +413,55 @@ export default function Cancellations() {
           )}
 
           <form onSubmit={handleCreateCancellation} className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
+            <div className="md:col-span-2 xl:col-span-5">
+              <label className="mb-1.75 flex items-center gap-1.25 text-[11px] font-semibold uppercase tracking-[0.06em] text-text-muted">
+                <FileText size={11} className="text-slate-500" /> Select Contract
+              </label>
+              <select
+                value={form.contractId}
+                onChange={(event) => handleContractSelect(event.target.value)}
+                className="portal-input w-full text-sm"
+              >
+                <option value="">Choose a contract to auto-fill cancellation values</option>
+                {contracts.map((contract) => (
+                  <option key={contract.id} value={contract.id}>
+                    {contract.customerName} - {contract.orderId}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {selectedContract && (
+              <>
+                <div>
+                  <label className="mb-1.75 flex items-center gap-1.25 text-[11px] font-semibold uppercase tracking-[0.06em] text-text-muted">
+                    <Hash size={11} className="text-slate-500" /> Order ID
+                  </label>
+                  <div className="portal-input flex min-h-[42px] items-center bg-slate-50 text-sm text-text-primary">
+                    {selectedContract.orderId}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="mb-1.75 flex items-center gap-1.25 text-[11px] font-semibold uppercase tracking-[0.06em] text-text-muted">
+                    <ReceiptText size={11} className="text-slate-500" /> Covered Product
+                  </label>
+                  <div className="portal-input flex min-h-[42px] items-center bg-slate-50 text-sm text-text-primary">
+                    {selectedContract.coveredProductLabel}
+                  </div>
+                </div>
+
+                <div className="md:col-span-2 xl:col-span-3">
+                  <label className="mb-1.75 flex items-center gap-1.25 text-[11px] font-semibold uppercase tracking-[0.06em] text-text-muted">
+                    <Home size={11} className="text-slate-500" /> Property Address
+                  </label>
+                  <div className="portal-input flex min-h-[42px] items-center bg-slate-50 text-sm text-text-primary">
+                    {selectedContract.propertyAddress}
+                  </div>
+                </div>
+              </>
+            )}
+
             <div>
               <label className="mb-1.75 flex items-center gap-1.25 text-[11px] font-semibold uppercase tracking-[0.06em] text-text-muted">
                 <User size={11} className="text-slate-500" /> Customer Name
@@ -349,11 +555,11 @@ export default function Cancellations() {
               </button>
             </div>
           </form>
-        </div>
-      )}
+          </div>
+        )}
 
-      <div className="portal-card overflow-hidden">
-        <div className="flex flex-col gap-3 border-b border-portal-border-sub px-5 py-4 md:flex-row md:items-center md:justify-between">
+        <div className="portal-card overflow-hidden">
+          <div className="flex flex-col gap-3 border-b border-portal-border-sub px-5 py-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h2 className="text-sm font-bold text-text-primary">Cancellation Quotes</h2>
             <p className="mt-1 text-xs text-text-muted">
@@ -373,8 +579,8 @@ export default function Cancellations() {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-portal-border-sub">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-portal-border-sub">
             <thead className="bg-slate-50">
               <tr>
                 <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.06em] text-text-muted">Name</th>
@@ -415,7 +621,7 @@ export default function Cancellations() {
                   <td className="px-5 py-4 text-sm text-text-secondary">{formatDateTime(cancellation.processedAt)}</td>
                   <td className="px-5 py-4 text-right text-sm">
                     <button
-                      onClick={() => handleProcessCancellation(cancellation)}
+                      onClick={() => setConfirmingCancellation(cancellation)}
                       disabled={cancellation.status === 'processed' || processingId === cancellation._id}
                       className="rounded-[8px] border border-emerald-600/20 bg-emerald-600/10 px-3 py-1.75 text-xs font-semibold text-emerald-600 transition hover:bg-emerald-600/15 disabled:cursor-not-allowed disabled:opacity-60"
                     >
@@ -437,9 +643,10 @@ export default function Cancellations() {
                 </tr>
               )}
             </tbody>
-          </table>
+            </table>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
