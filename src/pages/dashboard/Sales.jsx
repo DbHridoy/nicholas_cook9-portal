@@ -39,6 +39,7 @@ const parseSaleAmount = (value) => {
 };
 
 const getContractStatus = (contract) => {
+  if (contract?.status === 'cancelled') return 'Cancelled';
   if (!contract?.expiry) return 'Active';
 
   return new Date(contract.expiry).getTime() < Date.now() ? 'Expired' : 'Active';
@@ -201,7 +202,11 @@ export default function Contracts() {
     setTimeout(() => setSuccessMsg(''), 4000);
   };
 
-  const statusColor = (s) => s === 'Active' ? 'badge-resolved' : 'badge-unresolved';
+  const statusColor = (status) => {
+    if (status === 'Active') return 'badge-resolved';
+    if (status === 'Cancelled') return 'bg-slate-200 text-slate-700';
+    return 'badge-unresolved';
+  };
 
   return (
     <div className="flex flex-col gap-5.5 animate-fade-in">
